@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		7DE395323017AB4D00EE2527 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 7DE395313017AB4D00EE2527 /* SDWebImageSwiftUI */; };
+		7DEDC91B3017FC51004CDB98 /* DotLottie in Frameworks */ = {isa = PBXBuildFile; productRef = 7DEDC91A3017FC51004CDB98 /* DotLottie */; };
+		7DEDC91D3017FC51004CDB98 /* DotLottiePlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 7DEDC91C3017FC51004CDB98 /* DotLottiePlayer */; };
+		7DEDC9AC3018027D004CDB98 /* SwiftfulRouting in Frameworks */ = {isa = PBXBuildFile; productRef = 7DEDC9AB3018027D004CDB98 /* SwiftfulRouting */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		7DE3951830179C0B00EE2527 /* Places.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Places.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +30,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7DEDC91D3017FC51004CDB98 /* DotLottiePlayer in Frameworks */,
+				7DE395323017AB4D00EE2527 /* SDWebImageSwiftUI in Frameworks */,
+				7DEDC91B3017FC51004CDB98 /* DotLottie in Frameworks */,
+				7DEDC9AC3018027D004CDB98 /* SwiftfulRouting in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +76,10 @@
 			);
 			name = Places;
 			packageProductDependencies = (
+				7DE395313017AB4D00EE2527 /* SDWebImageSwiftUI */,
+				7DEDC91A3017FC51004CDB98 /* DotLottie */,
+				7DEDC91C3017FC51004CDB98 /* DotLottiePlayer */,
+				7DEDC9AB3018027D004CDB98 /* SwiftfulRouting */,
 			);
 			productName = Places;
 			productReference = 7DE3951830179C0B00EE2527 /* Places.app */;
@@ -94,6 +109,11 @@
 			);
 			mainGroup = 7DE3950F30179C0B00EE2527;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				7DE395303017AB4C00EE2527 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+				7DEDC9193017FC51004CDB98 /* XCRemoteSwiftPackageReference "dotlottie-ios" */,
+				7DEDC9AA3018027D004CDB98 /* XCRemoteSwiftPackageReference "SwiftfulRouting" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7DE3951930179C0B00EE2527 /* Products */;
 			projectDirPath = "";
@@ -184,6 +204,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -241,6 +262,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -332,6 +354,56 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		7DE395303017AB4C00EE2527 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.4;
+			};
+		};
+		7DEDC9193017FC51004CDB98 /* XCRemoteSwiftPackageReference "dotlottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/LottieFiles/dotlottie-ios.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		7DEDC9AA3018027D004CDB98 /* XCRemoteSwiftPackageReference "SwiftfulRouting" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SwiftfulThinking/SwiftfulRouting.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.2.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7DE395313017AB4D00EE2527 /* SDWebImageSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7DE395303017AB4C00EE2527 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			productName = SDWebImageSwiftUI;
+		};
+		7DEDC91A3017FC51004CDB98 /* DotLottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7DEDC9193017FC51004CDB98 /* XCRemoteSwiftPackageReference "dotlottie-ios" */;
+			productName = DotLottie;
+		};
+		7DEDC91C3017FC51004CDB98 /* DotLottiePlayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7DEDC9193017FC51004CDB98 /* XCRemoteSwiftPackageReference "dotlottie-ios" */;
+			productName = DotLottiePlayer;
+		};
+		7DEDC9AB3018027D004CDB98 /* SwiftfulRouting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7DEDC9AA3018027D004CDB98 /* XCRemoteSwiftPackageReference "SwiftfulRouting" */;
+			productName = SwiftfulRouting;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7DE3951030179C0B00EE2527 /* Project object */;
 }

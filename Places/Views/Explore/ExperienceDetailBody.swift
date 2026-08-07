@@ -1,0 +1,131 @@
+//
+//  ExperienceDetailBody.swift
+//  Places
+//
+//  Everything below the hero image on an experience detail. Shared by the pushed
+//  `ExperienceDetailView` and the `DestinationTransition` morph, so the two entry
+//  points render identical content.
+//
+
+import SwiftUI
+
+struct ExperienceDetailBody: View {
+    let experience: Experience
+    /// The morph shows the title + rating on the hero image, so it hides them here.
+    var showsTitle: Bool = true
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: 10) {
+                if showsTitle {
+                    Text(experience.title)
+                        .font(.system(.title, design: .rounded).bold())
+                }
+
+                Text(experience.description)
+                    .font(.system(.body, design: .rounded))
+                    .foregroundStyle(.secondary)
+
+                if showsTitle {
+                    HStack(spacing: 6) {
+                        Image(systemName: "star.fill").font(.footnote)
+                        Text("\(experience.rating, format: .number.precision(.fractionLength(2)))")
+                            .fontWeight(.semibold)
+                        Text("·")
+                        Text("\(experience.reviewsCount) reviews").underline()
+                    }
+                    .font(.system(.subheadline, design: .rounded))
+                    .foregroundStyle(.primary)
+                }
+            }
+
+            Divider()
+
+            hostRow
+            infoRow(icon: "mappin.and.ellipse", title: experience.locationName, subtitle: experience.locationArea)
+            infoRow(icon: "clock", title: experience.durationLabel, subtitle: experience.language)
+
+            if experience.freeCancellation {
+                cancellationCard
+            }
+
+            priceBlock
+        }
+        .padding(20)
+    }
+
+    private var hostRow: some View {
+        HStack(spacing: 14) {
+            DownsampledAssetImage(name: experience.hostImageName, width: 48, height: 48)
+                .frame(width: 48, height: 48)
+                .clipShape(.circle)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Hosted by \(experience.hostName)")
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                Text(experience.hostTagline)
+                    .font(.system(size: 14, design: .rounded))
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func infoRow(icon: String, title: String, subtitle: String) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .foregroundStyle(.primary)
+                .frame(width: 48, height: 48)
+                .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 12))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                Text(subtitle)
+                    .font(.system(size: 14, design: .rounded))
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+        }
+    }
+
+    private var cancellationCard: some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Free cancellation")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                Text("Up to 1 day before start time")
+                    .font(.system(size: 14, design: .rounded))
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+            Image(systemName: "calendar")
+                .font(.system(size: 20))
+                .foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 18))
+    }
+
+    private var priceBlock: some View {
+        HStack(alignment: .center) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text("From \(experience.priceLabel)")
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                Text("/ guest")
+                    .font(.system(size: 13, design: .rounded))
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 12)
+            Button("Show dates") {
+                // TODO: booking flow (dates → checkout).
+            }
+            .buttonStyle(.appAccent)
+            .frame(width: 160)
+        }
+        .padding(.top, 4)
+    }
+}
+
+#Preview {
+    ScrollView { ExperienceDetailBody(experience: Experience.samples[0]) }
+}
