@@ -36,7 +36,7 @@ struct FourthOnboarding: View {
                 .microAnimations(delay: 0.4, slideDirection: .Bottom, offsetAmount: 0)
                 .padding(.vertical)
             
-            PrimaryButton(title: "Start Tour", action: navigateToHome)
+            PrimaryButton(title: "Start Tour", kind: .appPrimary, action: navigateToHome)
                 .microAnimations(delay: 0.5, slideDirection: .Bottom, offsetAmount: 0)
                 .padding(.top)
             Button {

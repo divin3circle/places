@@ -39,6 +39,7 @@ struct ChatsTab: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.bottom, 8)
+        .padding(.top, 16)
     }
 }
 

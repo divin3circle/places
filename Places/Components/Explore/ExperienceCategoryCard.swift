@@ -19,7 +19,7 @@ struct ExperienceCategoryCard: View {
                 .clipShape(.rect(cornerRadius: 20, style: .continuous))
 
             Text(category.label)
-                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundStyle(.primary)
                 .lineLimit(2)
                 .frame(width: side, alignment: .leading)

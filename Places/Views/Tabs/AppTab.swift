@@ -86,7 +86,7 @@ struct AppTab: View {
         }
         .environmentObject(sponsoredViewModel)
         .sheet(isPresented: $showCreate) {
-            CreateTripView()
+            CreateTripSheet()
         }
     }
 }

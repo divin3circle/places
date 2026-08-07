@@ -23,7 +23,9 @@ struct ChatsHeader: View {
             Image(systemName: "magnifyingglass")
               .font(.system(size: 22))
               .fontDesign(.rounded)
+              .foregroundStyle(.foreground)
           }
+            
           .compositingGroup()
           Button {
           } label: {

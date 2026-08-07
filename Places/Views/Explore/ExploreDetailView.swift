@@ -50,7 +50,7 @@ struct ExploreDetailView: View {
         .scrollIndicators(.hidden)
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showCreate) { CreateTripView() }
+        .sheet(isPresented: $showCreate) { CreateTripSheet() }
     }
 
     @ViewBuilder

@@ -51,7 +51,7 @@ struct PlaceCard: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .font(.system(size: 15, weight: .medium, design: .rounded))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
                 Text(subtitle)

@@ -36,7 +36,7 @@ struct FirstOnboarding: View {
                 }
             }
             Spacer()
-            PrimaryButton(title: "Continue", action: action)
+            PrimaryButton(title: "Continue", kind: .appPrimary, action: action)
                 .microAnimations(delay: 1.5, slideDirection: .Bottom, offsetAmount: 0)
                 .padding(.top)
             Spacer()

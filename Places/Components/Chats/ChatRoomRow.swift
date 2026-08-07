@@ -2,9 +2,6 @@
 //  ChatRoomRow.swift
 //  Places
 //
-//  A single conversation row in the Messages list: avatar cluster, title
-//  (participant names or support channel), last-message preview, an optional
-//  "dates · place" line, and a timestamp. Unread rooms read bolder.
 //
 
 import SwiftUI
@@ -19,13 +16,13 @@ struct ChatRoomRow: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(room.title)
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .font(.system(size: 16, design: .rounded))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
 
                 Text(room.previewLine)
                     .font(.system(size: 14, design: .rounded))
-                    .fontWeight(room.hasUnread ? .semibold : .regular)
+                    .fontWeight(room.hasUnread ? .medium : .regular)
                     .foregroundStyle(room.hasUnread ? .primary : .secondary)
                     .lineLimit(1)
 

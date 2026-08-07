@@ -9,19 +9,23 @@ import SwiftUI
 
 struct PrimaryButton: View {
   var title: String
+  /// Defaults to accent (reserved for primary conversion / generate actions like
+  /// "Plan this trip"). Onboarding navigation buttons pass `.appPrimary` so only
+  /// true conversion CTAs stay coral.
+  var kind: AppButtonKind = .appAccent
   var action: () -> Void
   var body: some View {
     Button(action: action) {
       Text(title)
-        .bold()
-        .frame(height: 55)
-        .frame(maxWidth: .infinity)
-        .background(.accent, in: Capsule())
-        .tint(.white)
     }
+    .buttonStyle(AppButtonStyle(kind: kind, minHeight: 55))
   }
 }
 
 #Preview {
-  PrimaryButton(title: "Login", action: {})
+  VStack(spacing: 14) {
+    PrimaryButton(title: "Plan this trip", action: {})
+    PrimaryButton(title: "Continue", kind: .appPrimary, action: {})
+  }
+  .padding()
 }

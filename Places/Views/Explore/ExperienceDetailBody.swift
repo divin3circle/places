@@ -16,17 +16,19 @@ struct ExperienceDetailBody: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
-            VStack(alignment: .leading, spacing: 10) {
-                if showsTitle {
+            // The morph shows the title + rating on the hero image and the
+            // container tucks the body's first rows under that hero, so we skip
+            // this whole intro there (it would peek out awkwardly). The pushed
+            // detail — which has a normal image gallery, not the morph — keeps it.
+            if showsTitle {
+                VStack(alignment: .leading, spacing: 10) {
                     Text(experience.title)
                         .font(.system(.title, design: .rounded).bold())
-                }
 
-                Text(experience.description)
-                    .font(.system(.body, design: .rounded))
-                    .foregroundStyle(.secondary)
+                    Text(experience.description)
+                        .font(.system(.body, design: .rounded))
+                        .foregroundStyle(.secondary)
 
-                if showsTitle {
                     HStack(spacing: 6) {
                         Image(systemName: "star.fill").font(.footnote)
                         Text("\(experience.rating, format: .number.precision(.fractionLength(2)))")
@@ -37,9 +39,9 @@ struct ExperienceDetailBody: View {
                     .font(.system(.subheadline, design: .rounded))
                     .foregroundStyle(.primary)
                 }
-            }
 
-            Divider()
+                Divider()
+            }
 
             hostRow
             infoRow(icon: "mappin.and.ellipse", title: experience.locationName, subtitle: experience.locationArea)
@@ -51,7 +53,12 @@ struct ExperienceDetailBody: View {
 
             priceBlock
         }
-        .padding(20)
+        .padding(.horizontal, 20)
+        .padding(.bottom, 20)
+        // The morph tucks ~50pt of the body top under the pinned hero, so add
+        // clearance there to keep the host row from being clipped. The pushed
+        // detail (with a real gallery, not the morph) needs no extra top space.
+        .padding(.top, showsTitle ? 20 : 64)
     }
 
     private var hostRow: some View {

@@ -92,10 +92,10 @@ struct NotifiationsOnboarding<NotificationLogo: View>: View {
                         )
                             .fontWeight(.medium)
                             .fontDesign(.rounded)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color(.systemBackground))
                             .frame(maxWidth: .infinity)
                             .frame(height: 55)
-                            .background(.accent, in: .capsule)
+                            .background(Color.primary, in: .capsule)
                     }
                     
                     if authorization == .notDetermined {

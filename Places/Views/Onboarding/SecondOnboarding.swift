@@ -37,7 +37,7 @@ struct SecondOnboarding: View {
                     .font(.system(.caption, design: .rounded, weight: .medium))
                     .foregroundStyle(.secondary)
 
-                PrimaryButton(title: "Continue") {
+                PrimaryButton(title: "Continue", kind: .appPrimary) {
                     navigateToThirdOnboarding()
                 }
                 .disabled(selectedInterests.isEmpty)
