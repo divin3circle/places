@@ -29,7 +29,7 @@ nonisolated struct GroundingPlace: Identifiable {
     }
 }
 
-extension GroundingPlace {
+nonisolated extension GroundingPlace {
     init(destination d: DestinationDTO) {
         self.init(name: d.name, latitude: d.latitude, longitude: d.longitude,
                   imageURL: d.bannerUrl, subtitle: d.category,

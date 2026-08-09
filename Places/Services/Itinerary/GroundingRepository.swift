@@ -9,11 +9,11 @@
 import Foundation
 import Supabase
 
-protocol GroundingProviding {
+nonisolated protocol GroundingProviding {
     func fetchGroundingPlaces() async throws -> [GroundingPlace]
 }
 
-struct SupabaseGroundingRepository: GroundingProviding {
+nonisolated struct SupabaseGroundingRepository: GroundingProviding {
     func fetchGroundingPlaces() async throws -> [GroundingPlace] {
         async let dests: [DestinationDTO] = SupabaseService.client.from("destinations").select().execute().value
         async let exps: [ExperienceDTO] = SupabaseService.client.from("experiences").select().execute().value
