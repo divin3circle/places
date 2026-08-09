@@ -16,7 +16,8 @@ struct PlacesApp: App {
     // Single source of truth for auth phase + current profile.
     @State private var session = SessionStore(
         auth: SupabaseAuthProvider(),
-        profiles: ProfileRepository()
+        profiles: ProfileRepository(),
+        avatars: SupabaseAvatarStore()
     )
 
     // Fetched Home/Explore content (in-memory).

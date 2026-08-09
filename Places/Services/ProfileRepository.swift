@@ -14,6 +14,7 @@ protocol ProfileProviding {
     func updateName(_ name: String, id: UUID) async throws
     func updateInterests(_ tags: [String], id: UUID) async throws
     func updateOnboardingComplete(_ complete: Bool, id: UUID) async throws
+    func updateAvatarURL(_ url: String, id: UUID) async throws
 }
 
 struct ProfileRepository: ProfileProviding {
@@ -47,6 +48,14 @@ struct ProfileRepository: ProfileProviding {
         try await SupabaseService.client
             .from("profiles")
             .update(["onboarding_complete": complete])
+            .eq("id", value: id.uuidString)
+            .execute()
+    }
+
+    func updateAvatarURL(_ url: String, id: UUID) async throws {
+        try await SupabaseService.client
+            .from("profiles")
+            .update(["avatar_url": url])
             .eq("id", value: id.uuidString)
             .execute()
     }

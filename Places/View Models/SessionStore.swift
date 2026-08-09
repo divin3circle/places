@@ -18,14 +18,25 @@ final class SessionStore {
 
     private let auth: AuthProviding
     private let profiles: ProfileProviding
+    private let avatars: AvatarStoring
     private let defaults: UserDefaults
     private let mirrorKey = "onboarding_complete_mirror"
     private var userID: UUID?
 
-    init(auth: AuthProviding, profiles: ProfileProviding, defaults: UserDefaults = .standard) {
+    init(auth: AuthProviding, profiles: ProfileProviding, avatars: AvatarStoring, defaults: UserDefaults = .standard) {
         self.auth = auth
         self.profiles = profiles
+        self.avatars = avatars
         self.defaults = defaults
+    }
+
+    /// Uploads a new profile photo and persists its URL. Throws on failure so the
+    /// caller can surface it; `avatar_url` is written only after a successful upload.
+    func updateAvatar(jpegData: Data) async throws {
+        guard let id = userID else { return }
+        let url = try await avatars.uploadAvatar(jpegData, userID: id)
+        try await profiles.updateAvatarURL(url, id: id)
+        currentProfile?.avatarURL = url
     }
 
     func bootstrap() async {

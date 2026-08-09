@@ -23,6 +23,18 @@ final class FakeProfileProviding: ProfileProviding {
     func updateName(_ name: String, id: UUID) async throws { stored.name = name }
     func updateInterests(_ tags: [String], id: UUID) async throws { stored.interests = tags }
     func updateOnboardingComplete(_ complete: Bool, id: UUID) async throws { stored.onboardingComplete = complete }
+    func updateAvatarURL(_ url: String, id: UUID) async throws { stored.avatarURL = url }
+}
+
+final class FakeAvatarStoring: AvatarStoring {
+    var returnURL = "https://cdn.example/avatar.jpg"
+    var shouldThrow = false
+    private(set) var uploadCount = 0
+    func uploadAvatar(_ data: Data, userID: UUID) async throws -> String {
+        uploadCount += 1
+        if shouldThrow { throw URLError(.badServerResponse) }
+        return returnURL
+    }
 }
 
 extension Profile {

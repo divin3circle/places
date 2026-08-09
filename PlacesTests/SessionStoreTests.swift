@@ -12,7 +12,7 @@ struct SessionStoreTests {
         let repo = FakeProfileProviding(stored: profile)
         repo.shouldThrowOnFetch = throwFetch
         let defaults = UserDefaults(suiteName: "test-\(UUID().uuidString)")!
-        return (SessionStore(auth: auth, profiles: repo, defaults: defaults), repo)
+        return (SessionStore(auth: auth, profiles: repo, avatars: FakeAvatarStoring(), defaults: defaults), repo)
     }
 
     @Test func bootstrapNoSessionIsSignedOut() async {

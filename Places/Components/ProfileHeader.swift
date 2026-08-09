@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftfulRouting
+import PhotosUI
 
 struct ProfileHeader: View {
     @Environment(\.colorScheme) var colorScheme
@@ -16,16 +17,43 @@ struct ProfileHeader: View {
 
     @Environment(SessionStore.self) private var session: SessionStore?
 
+    @State private var pickedItem: PhotosPickerItem?
+    @State private var isUploading = false
+    @State private var toast: ToastData?
+
     private var displayName: String { session?.currentProfile?.name ?? "Traveler" }
     private var displayEmail: String { session?.currentProfile?.email ?? "" }
 
     var body: some View {
         VStack(spacing: 12) {
-            Rectangle()
-                .foregroundStyle(.clear)
-                .frame(width: 100, height: isLargerHeader ? 300 : 100)
-                .clipShape(.circle)
-            
+            PhotosPicker(selection: $pickedItem, matching: .images) {
+                Rectangle()
+                    .foregroundStyle(.clear)
+                    .frame(width: 100, height: isLargerHeader ? 300 : 100)
+                    .clipShape(.circle)
+                    .overlay {
+                        if isUploading {
+                            ZStack {
+                                Circle().fill(.black.opacity(0.35))
+                                ProgressView().tint(.white)
+                            }
+                            .frame(width: 100, height: 100)
+                        }
+                    }
+                    .overlay(alignment: .bottomTrailing) {
+                        Image(systemName: "camera.fill")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .padding(6)
+                            .background(Circle().fill(Color.accentColor))
+                            .offset(x: -6, y: -6)
+                            .opacity(isLargerHeader ? 0 : 1)   // badge in the collapsed avatar
+                    }
+                    .contentShape(.circle)
+            }
+            .buttonStyle(.plain)
+            .disabled(isUploading)
+
             VStack(spacing: 20) {
                 CustomNavigationBar()
                     .foregroundStyle(isLargerHeader ? .white : .primary)
@@ -57,21 +85,49 @@ struct ProfileHeader: View {
             )
         }
         .padding(.top, 15)
+        .toast($toast)
+        .onChange(of: pickedItem) { _, item in
+            guard let item else { return }
+            Task {
+                isUploading = true
+                defer { isUploading = false; pickedItem = nil }
+                do {
+                    guard let data = try await item.loadTransferable(type: Data.self),
+                          let image = UIImage(data: data),
+                          let jpeg = AvatarImage.jpegData(from: image) else {
+                        toast = ToastData(message: "Couldn't read that photo.", isError: true)
+                        return
+                    }
+                    try await session?.updateAvatar(jpegData: jpeg)
+                } catch {
+                    toast = ToastData(message: "Couldn't update photo. Please try again.", isError: true)
+                }
+            }
+        }
     }
-    
+
     @ViewBuilder
     private func LogoView() -> some View {
+        let side: CGFloat = isLargerHeader ? 200 : 55
         ZStack {
             Rectangle()
                 .fill(.black)
-            
-            Image("profile")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(height: isLargerHeader ? 200 : 55)
-                .foregroundStyle(.white)
-                .clipShape(Circle())
-                .offset(y: isLargerHeader ? -topInset : 0)
+
+            Group {
+                if let url = session?.currentProfile?.avatarURL, !url.isEmpty {
+                    RemoteImage(url, width: side, height: side)
+                        .frame(width: side, height: side)
+                        .clipShape(Circle())
+                } else {
+                    Image("profile")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(height: side)
+                        .foregroundStyle(.white)
+                        .clipShape(Circle())
+                }
+            }
+            .offset(y: isLargerHeader ? -topInset : 0)
         }
     }
     
