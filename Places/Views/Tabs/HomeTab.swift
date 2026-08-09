@@ -14,7 +14,7 @@ struct HomeTab: View {
 
     @Environment(\.router) private var router
     @Environment(ContentStore.self) private var content: ContentStore?
-    @EnvironmentObject private var sponsoredModel: SponsoredViewModel
+    @Environment(SponsoredViewModel.self) private var sponsoredModel
 
     @State private var selectedTrip: Trip?
     @State private var savedIds: Set<UUID> = []
@@ -55,6 +55,7 @@ struct HomeTab: View {
 
     private func loadContent() async {
         await content?.loadPopularDestinations()
+        await content?.loadSponsored()
         await content?.loadCategories()
         await content?.loadExperiences(cityId: city.rawValue)
     }
@@ -117,17 +118,22 @@ struct HomeTab: View {
     private var sponsoredSection: some View {
         VStack(spacing: 8) {
             SectionHeader(title: "Sponsored", hasButton: false, action: {})
-            carousel(sponsoredModel.cards) { card in
-                Button {
-                    withAnimation(.spring()) {
-                        sponsoredModel.selectedCard = card
-                        sponsoredModel.showCard = true
+            loadableSection(content?.sponsored,
+                            empty: "No sponsors yet.",
+                            retry: { await content?.loadSponsored(force: true) }) { dtos in
+                carousel(dtos) { dto in
+                    let card = Sponsored(dto: dto)
+                    Button {
+                        withAnimation(.spring()) {
+                            sponsoredModel.selectedCard = card
+                            sponsoredModel.showCard = true
+                        }
+                    } label: {
+                        PlaceCard(image: card.image, title: card.title, subtitle: card.subtitle,
+                                  badge: "Sponsored", width: 185, imageHeight: 140)
                     }
-                } label: {
-                    PlaceCard(image: card.image, title: card.title, subtitle: card.subtitle,
-                              badge: "Sponsored", width: 185, imageHeight: 140)
+                    .buttonStyle(PressableButtonStyle())
                 }
-                .buttonStyle(PressableButtonStyle())
             }
         }
     }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SponsoredDetails: View {
-    @EnvironmentObject var model: SponsoredViewModel
+    @Environment(SponsoredViewModel.self) var model
     var animation: Namespace.ID
 
     private var card: Sponsored { model.selectedCard }
@@ -144,5 +144,5 @@ struct SponsoredDetails: View {
 #Preview {
     @Previewable @Namespace var ns
     SponsoredCarousel(animation: ns)
-        .environmentObject(SponsoredViewModel())
+        .environment(SponsoredViewModel())
 }

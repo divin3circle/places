@@ -11,7 +11,10 @@ struct AppTab: View {
     @State private var activeTab: AppTabs = .home
     @State private var progress: CGFloat = 0
     @State private var showCreate: Bool = false
-    @StateObject private var sponsoredViewModel = SponsoredViewModel()
+
+    @State private var pendingConfig: TripConfig?
+    @State private var itineraryConfig: TripConfig?
+    @State private var sponsoredViewModel = SponsoredViewModel()
     @Namespace private var sponsoredAnimation
 
     var body: some View {
@@ -74,7 +77,12 @@ struct AppTab: View {
             )
             .padding(.horizontal, 8)
             .padding(.vertical, 5)
-            .glassEffect(.regular, in: .capsule)
+            // Solid, theme-adaptive bar: white in light mode, near-black in dark.
+            // A hairline border + soft shadow keep it reading as a floating bar
+            // (a plain black capsule over dark content would otherwise disappear).
+            .background(Color(.systemBackground), in: .capsule)
+            .overlay(Capsule().stroke(Color.primary.opacity(0.08), lineWidth: 1))
+            .shadow(color: .black.opacity(0.12), radius: 12, y: 4)
             .scaleEffect(1 - (progress * 0.15), anchor: .bottom)
             .padding(.horizontal, 20)
         }
@@ -84,9 +92,20 @@ struct AppTab: View {
                     .transition(.opacity)
             }
         }
-        .environmentObject(sponsoredViewModel)
-        .sheet(isPresented: $showCreate) {
-            CreateTripSheet()
+        .environment(sponsoredViewModel)
+        .sheet(isPresented: $showCreate, onDismiss: {
+            if let pendingConfig {
+                itineraryConfig = pendingConfig
+                self.pendingConfig = nil
+            }
+        }) {
+            CreateTripSheet(onGenerate: { config in
+                pendingConfig = config
+                showCreate = false
+            })
+        }
+        .fullScreenCover(item: $itineraryConfig) { config in
+            GenerateItineraryView(config: config)
         }
     }
 }

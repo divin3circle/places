@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SponsoredCardView: View {
-    @EnvironmentObject var model: SponsoredViewModel
+    @Environment(SponsoredViewModel.self) var model
     var card: Sponsored
     var animation: Namespace.ID
 
@@ -22,9 +22,7 @@ struct SponsoredCardView: View {
             .background {
                 ZStack {
                     card.accentColor
-                    DownsampledAssetImage(
-                        name: card.image, width: 300, height: 400, placeholderColor: .clear
-                    )
+                    RemoteImage(card.image, width: 300, height: 400)
                     LinearGradient(
                         colors: [.clear, .black.opacity(0.15), .black.opacity(0.75)],
                         startPoint: .center,
@@ -94,5 +92,5 @@ struct SponsoredCardView: View {
 #Preview {
     @Previewable @Namespace var ns
     SponsoredCarousel(animation: ns)
-        .environmentObject(SponsoredViewModel())
+        .environment(SponsoredViewModel())
 }

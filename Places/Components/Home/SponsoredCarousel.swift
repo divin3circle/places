@@ -8,10 +8,8 @@
 import SwiftUI
 
 struct SponsoredCarousel: View {
-    @EnvironmentObject var model: SponsoredViewModel
+    @Environment(SponsoredViewModel.self) var model
     var width = UIScreen.main.bounds.width
-    /// Shared with the full-screen `SponsoredDetails` (hosted by `AppTab`) so the
-    /// tapped card morphs into the detail via `matchedGeometryEffect`.
     var animation: Namespace.ID
 
   var body: some View {
@@ -117,5 +115,5 @@ struct SponsoredCarousel: View {
 #Preview {
     @Previewable @Namespace var ns
     SponsoredCarousel(animation: ns)
-        .environmentObject(SponsoredViewModel())
+        .environment(SponsoredViewModel())
 }
