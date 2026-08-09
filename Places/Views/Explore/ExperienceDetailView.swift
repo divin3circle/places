@@ -40,5 +40,5 @@ struct ExperienceDetailView: View {
 }
 
 #Preview {
-    ExperienceDetailView(experience: Experience.samples[0])
+    ExperienceDetailView(experience: Experience.preview)
 }

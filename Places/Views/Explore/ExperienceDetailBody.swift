@@ -55,10 +55,10 @@ struct ExperienceDetailBody: View {
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 20)
-        // The morph tucks ~50pt of the body top under the pinned hero, so add
-        // clearance there to keep the host row from being clipped. The pushed
-        // detail (with a real gallery, not the morph) needs no extra top space.
-        .padding(.top, showsTitle ? 20 : 64)
+        // The morph tucks ~70pt of the body top under the pinned hero, so add
+        // clearance there to keep the host row (48pt avatar is the tallest) from
+        // being clipped. The pushed detail (real gallery, not the morph) needs none.
+        .padding(.top, showsTitle ? 20 : 88)
     }
 
     private var hostRow: some View {
@@ -134,5 +134,5 @@ struct ExperienceDetailBody: View {
 }
 
 #Preview {
-    ScrollView { ExperienceDetailBody(experience: Experience.samples[0]) }
+    ScrollView { ExperienceDetailBody(experience: Experience.preview) }
 }

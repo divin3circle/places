@@ -6,23 +6,43 @@
 //
 
 import SwiftUI
+import SDWebImageSwiftUI
 
-/// A modest destination/trip detail pushed from Explore cards. Uses the sample
-/// `Destination` for the blurb + interest tags until real data is wired.
-/// TODO: pass a real `Destination` once the catalog/backend exists.
+/// Destination detail pushed from Explore/Home cards. When opened from a live
+/// `DestinationDTO` it renders real data; the legacy `title/imageName` init is
+/// still used by not-yet-wired sections (For You / Recommendations / Curated).
 struct ExploreDetailView: View {
     let title: String
     let imageName: String
+    private let dto: DestinationDTO?
 
     @State private var showCreate = false
+    @State private var pendingConfig: TripConfig?
+    @State private var itineraryConfig: TripConfig?
 
-    private var destination: Destination? { Destination.samples.first }
+    init(title: String, imageName: String) {
+        self.title = title
+        self.imageName = imageName
+        self.dto = nil
+    }
+
+    init(destination: DestinationDTO) {
+        self.title = destination.name
+        self.imageName = destination.bannerUrl
+        self.dto = destination
+    }
+
+    private var blurb: String? {
+        dto?.description ?? Destination.samples.first?.description
+    }
+    private var tags: [String] {
+        dto?.interestTags ?? Destination.samples.first?.interestTags ?? []
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                Image(imageName)
-                    .resizable()
+                heroImage
                     .aspectRatio(contentMode: .fill)
                     .frame(height: 260)
                     .frame(maxWidth: .infinity)
@@ -33,12 +53,20 @@ struct ExploreDetailView: View {
                     .font(.system(.title, design: .rounded).bold())
                     .fontWidth(.expanded)
 
-                if let destination {
-                    Text(destination.description)
+                if let fee = dto?.feeLabel {
+                    Label("Entry: \(fee)", systemImage: "ticket")
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundStyle(.secondary)
+                }
+
+                if let blurb {
+                    Text(blurb)
                         .font(.system(size: 15, design: .rounded))
                         .foregroundStyle(.secondary)
+                }
 
-                    tagCloud(for: destination)
+                if !tags.isEmpty {
+                    tagCloud(tags)
                 }
 
                 PrimaryButton(title: "Plan this trip") { showCreate = true }
@@ -50,14 +78,36 @@ struct ExploreDetailView: View {
         .scrollIndicators(.hidden)
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showCreate) { CreateTripSheet() }
+        .sheet(isPresented: $showCreate, onDismiss: {
+            if let pendingConfig {
+                itineraryConfig = pendingConfig
+                self.pendingConfig = nil
+            }
+        }) {
+            CreateTripSheet(onGenerate: { config in
+                pendingConfig = config
+                showCreate = false
+            })
+        }
+        .fullScreenCover(item: $itineraryConfig) { config in
+            GenerateItineraryView(config: config)
+        }
     }
 
     @ViewBuilder
-    private func tagCloud(for destination: Destination) -> some View {
+    private var heroImage: some View {
+        if imageName.hasPrefix("http"), let url = URL(string: imageName) {
+            WebImage(url: url).resizable().indicator(.activity)
+        } else {
+            Image(imageName).resizable()
+        }
+    }
+
+    @ViewBuilder
+    private func tagCloud(_ tags: [String]) -> some View {
         FlowLayout(spacing: 8) {
-            ForEach(destination.interestTags, id: \.self) { tag in
-                Text(destination.getUIFriendlyTag(tag).capitalized)
+            ForEach(tags, id: \.self) { tag in
+                Text(tag.replacingOccurrences(of: "_", with: " ").capitalized)
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.accent)
                     .padding(.horizontal, 12)

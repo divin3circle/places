@@ -3,9 +3,8 @@
 //  Places
 //
 //  The filtered list opened when a category tile is tapped in the "Explore
-//  experiences nearby" row: a header, a filter-pill row (seeded with the tapped
-//  category), a search field, and a vertical list of experiences. Each row pushes
-//  the experience detail.
+//  experiences nearby" row: a header, a filter-pill row (from live categories),
+//  a search field, and a vertical list of experiences fetched for the city + tag.
 //
 
 import SwiftUI
@@ -16,6 +15,7 @@ struct ExperienceCategoryListView: View {
     var city: EACity = .nairobi
 
     @Environment(\.router) private var router
+    @Environment(ContentStore.self) private var content: ContentStore?
 
     @State private var selectedTag: String
     @State private var searchText = ""
@@ -25,6 +25,16 @@ struct ExperienceCategoryListView: View {
         self.category = category
         self.city = city
         _selectedTag = State(initialValue: category.tag)
+    }
+
+    private var key: String { "\(city.rawValue)|\(selectedTag)" }
+
+    /// Live categories for the filter row; falls back to the tapped one until loaded.
+    private var categoryPills: [ExperienceCategory] {
+        if case .loaded(let dtos) = content?.categories, !dtos.isEmpty {
+            return dtos.map(ExperienceCategory.init(dto:))
+        }
+        return [category]
     }
 
     var body: some View {
@@ -41,8 +51,64 @@ struct ExperienceCategoryListView: View {
                 }
                 .padding(.horizontal, 15)
 
+                experiencesList
+                    .padding(.horizontal, 15)
+                    .animation(.snappy, value: selectedTag)
+            }
+            .padding(.top, 12)
+            .padding(.bottom, 40)
+        }
+        .scrollIndicators(.hidden)
+        .task(id: selectedTag) {
+            await content?.loadCategories()
+            await content?.loadExperiences(cityId: city.rawValue, categoryTag: selectedTag)
+        }
+    }
+
+    private var filterPills: some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: 8) {
+                ForEach(categoryPills) { cat in
+                    FilterPill(
+                        label: cat.label,
+                        isSelected: selectedTag == cat.tag
+                    ) {
+                        selectedTag = cat.tag
+                    }
+                }
+            }
+        }
+        .scrollIndicators(.hidden)
+    }
+
+    @ViewBuilder
+    private var experiencesList: some View {
+        switch content?.experiencesByCategory[key] ?? .idle {
+        case .idle, .loading:
+            LazyVStack(spacing: 22) {
+                ForEach(0..<4, id: \.self) { _ in
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(Color.gray.opacity(0.22))
+                        .frame(height: 120)
+                }
+            }
+            .redacted(reason: .placeholder)
+            .allowsHitTesting(false)
+
+        case .loaded(let dtos):
+            let matches = dtos.filter {
+                searchText.isEmpty || $0.title.localizedCaseInsensitiveContains(searchText)
+            }
+            if matches.isEmpty {
+                Text("No experiences here yet.")
+                    .font(.system(.subheadline, design: .rounded))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 40)
+            } else {
                 LazyVStack(spacing: 22) {
-                    ForEach(filtered) { experience in
+                    ForEach(matches) { dto in
+                        let experience = Experience(dto: dto)
                         Button {
                             router.showScreen(.push) { _ in
                                 ExperienceDetailView(experience: experience)
@@ -56,47 +122,23 @@ struct ExperienceCategoryListView: View {
                         }
                         .buttonStyle(PressableButtonStyle())
                     }
-
-                    if filtered.isEmpty {
-                        Text("No experiences here yet.")
-                            .font(.system(.subheadline, design: .rounded))
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 40)
-                    }
-                }
-                .padding(.horizontal, 15)
-                .animation(.snappy, value: selectedTag)
-            }
-            .padding(.top, 12)
-            .padding(.bottom, 40)
-        }
-        .scrollIndicators(.hidden)
-    }
-
-    private var filterPills: some View {
-        ScrollView(.horizontal) {
-            HStack(spacing: 8) {
-                ForEach(ExperienceCategory.all) { cat in
-                    FilterPill(
-                        label: cat.label,
-                        isSelected: selectedTag == cat.tag
-                    ) {
-                        selectedTag = cat.tag
-                    }
                 }
             }
-        }
-        .scrollIndicators(.hidden)
-    }
 
-    private var filtered: [Experience] {
-        Experience.samples.filter { exp in
-            let matchesCity = exp.city == city
-            let matchesTag = exp.categoryTag == selectedTag
-            let matchesSearch = searchText.isEmpty
-                || exp.title.localizedCaseInsensitiveContains(searchText)
-            return matchesCity && matchesTag && matchesSearch
+        case .failed(let message):
+            VStack(spacing: 8) {
+                Text(message)
+                    .font(.system(.footnote, design: .rounded))
+                    .foregroundStyle(.secondary)
+                Button {
+                    Task { await content?.loadExperiences(cityId: city.rawValue, categoryTag: selectedTag, force: true) }
+                } label: {
+                    Label("Retry", systemImage: "arrow.clockwise")
+                        .font(.system(.footnote, design: .rounded).weight(.semibold))
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 40)
         }
     }
 
@@ -109,6 +151,6 @@ struct ExperienceCategoryListView: View {
 
 #Preview {
     RouterView { _ in
-        ExperienceCategoryListView(category: ExperienceCategory.all[6])
+        ExperienceCategoryListView(category: ExperienceCategory.preview)
     }
 }

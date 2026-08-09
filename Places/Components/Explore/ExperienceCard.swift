@@ -24,7 +24,7 @@ struct ExperienceHero: View {
     var onToggleSave: (() -> Void)? = nil
 
     var body: some View {
-        DownsampledAssetImage(name: experience.coverImage, width: 320, height: 240)
+        RemoteImage(experience.coverImage, width: 320, height: 240)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .clipShape(.rect(cornerRadius: cornerRadius, style: .continuous))
             .overlay(alignment: .topLeading) {
@@ -99,9 +99,9 @@ struct ExperienceCaption: View {
 
 #Preview {
     VStack(alignment: .leading, spacing: 8) {
-        ExperienceHero(experience: Experience.samples[0], isSaved: true, onToggleSave: {})
+        ExperienceHero(experience: Experience.preview, isSaved: true, onToggleSave: {})
             .frame(width: 300, height: 210)
-        ExperienceCaption(experience: Experience.samples[0])
+        ExperienceCaption(experience: Experience.preview)
     }
     .padding()
 }

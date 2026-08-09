@@ -18,7 +18,7 @@ struct PlaceCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            DownsampledAssetImage(name: image, width: width, height: imageHeight)
+            RemoteImage(image, width: width, height: imageHeight)
                 .frame(width: width, height: imageHeight)
                 .clipShape(.rect(cornerRadius: 16, style: .continuous))
                 .overlay(alignment: .topLeading) {

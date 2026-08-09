@@ -69,8 +69,8 @@ struct ExperienceRow: View {
 
 #Preview {
     VStack(spacing: 20) {
-        ExperienceRow(experience: Experience.samples[0], onToggleSave: {})
-        ExperienceRow(experience: Experience.samples[2], isSaved: true, onToggleSave: {})
+        ExperienceRow(experience: Experience.preview, onToggleSave: {})
+        ExperienceRow(experience: Experience.preview, isSaved: true, onToggleSave: {})
     }
     .padding()
 }

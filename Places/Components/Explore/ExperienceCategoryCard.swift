@@ -14,7 +14,7 @@ struct ExperienceCategoryCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            DownsampledAssetImage(name: category.imageName, width: side, height: side)
+            RemoteImage(category.imageName, width: side, height: side)
                 .frame(width: side, height: side)
                 .clipShape(.rect(cornerRadius: 20, style: .continuous))
 
@@ -30,8 +30,8 @@ struct ExperienceCategoryCard: View {
 
 #Preview {
     HStack(spacing: 14) {
-        ExperienceCategoryCard(category: ExperienceCategory.all[0])
-        ExperienceCategoryCard(category: ExperienceCategory.all[6])
+        ExperienceCategoryCard(category: ExperienceCategory.preview)
+        ExperienceCategoryCard(category: ExperienceCategory.preview)
     }
     .padding()
 }

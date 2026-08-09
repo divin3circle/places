@@ -2,9 +2,10 @@
 //  RemoteImage.swift
 //  Places
 //
-//  Auto-detects source: an http(s) URL renders remotely (disk-cached by
-//  SDWebImage); anything else is a local asset name. Content always passes URLs;
-//  the local branch remains only for genuinely-local imagery.
+//  Drop-in for DownsampledAssetImage that auto-detects its source: an http(s)
+//  URL renders remotely (disk-cached by SDWebImage); anything else is a local
+//  asset name. Fills the frame the caller gives it — callers apply .frame/.clipShape,
+//  exactly as they did with DownsampledAssetImage.
 //
 
 import SwiftUI
@@ -26,10 +27,7 @@ struct RemoteImage: View {
             WebImage(url: url)
                 .resizable()
                 .indicator(.activity)
-                .transition(.fade(duration: 0.25))
                 .scaledToFill()
-                .frame(width: width, height: height)
-                .clipped()
         } else {
             DownsampledAssetImage(name: source, width: width, height: height)
         }
