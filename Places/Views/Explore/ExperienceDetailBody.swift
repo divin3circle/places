@@ -55,15 +55,15 @@ struct ExperienceDetailBody: View {
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 20)
-        // The morph tucks ~70pt of the body top under the pinned hero, so add
-        // clearance there to keep the host row (48pt avatar is the tallest) from
-        // being clipped. The pushed detail (real gallery, not the morph) needs none.
-        .padding(.top, showsTitle ? 20 : 88)
+        // The morph tucks the body top under the pinned hero, so add clearance
+        // there to keep the host row (48pt avatar is the tallest) from being
+        // clipped. The pushed detail (real gallery, not the morph) needs none.
+        .padding(.top, showsTitle ? 20 : 56)
     }
 
     private var hostRow: some View {
         HStack(spacing: 14) {
-            DownsampledAssetImage(name: experience.hostImageName, width: 48, height: 48)
+            RemoteImage(experience.hostImageName, width: 48, height: 48)
                 .frame(width: 48, height: 48)
                 .clipShape(.circle)
             VStack(alignment: .leading, spacing: 2) {

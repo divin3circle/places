@@ -57,8 +57,10 @@ struct ExperienceHero: View {
                 if expanded {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(experience.title)
-                            .font(.system(.title, design: .rounded).bold())
+                            .font(.system(.title2, design: .rounded).bold())
                             .foregroundStyle(.white)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.7)
                         HStack(spacing: 6) {
                             Image(systemName: "star.fill").font(.footnote)
                             Text("\(experience.rating, format: .number.precision(.fractionLength(2))) · \(experience.reviewsCount) reviews")
