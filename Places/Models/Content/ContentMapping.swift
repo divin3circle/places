@@ -58,7 +58,7 @@ extension ExperienceCategory {
 
 extension DestinationDTO {
     /// Card subtitle, e.g. "Reserve · ★ 4.9".
-    var subtitleLabel: String {
+    nonisolated var subtitleLabel: String {
         if let rating {
             return "\(category) · ★ \(String(format: "%.1f", rating))"
         }

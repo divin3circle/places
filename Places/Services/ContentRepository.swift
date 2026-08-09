@@ -14,6 +14,9 @@ protocol ContentProviding {
     func fetchSponsored() async throws -> [SponsoredDTO]
     func fetchCategories() async throws -> [ExperienceCategoryDTO]
     func fetchExperiences(cityId: String?, categoryTag: String?) async throws -> [ExperienceDTO]
+    func fetchExperiences(categoryTags: [String]) async throws -> [ExperienceDTO]
+    func fetchDestinations(matchingTags: [String]) async throws -> [DestinationDTO]
+    func fetchTrendingExperiences() async throws -> [ExperienceDTO]
 }
 
 struct SupabaseContentRepository: ContentProviding {
@@ -51,6 +54,33 @@ struct SupabaseContentRepository: ContentProviding {
         return try await query
             .order("is_trending", ascending: false)
             .order("rating", ascending: false)
+            .execute()
+            .value
+    }
+
+    func fetchExperiences(categoryTags: [String]) async throws -> [ExperienceDTO] {
+        try await db.from("experiences").select()
+            .in("category_tag", values: categoryTags)
+            .order("rating", ascending: false)
+            .limit(8)
+            .execute()
+            .value
+    }
+
+    func fetchDestinations(matchingTags: [String]) async throws -> [DestinationDTO] {
+        try await db.from("destinations").select()
+            .overlaps("interest_tags", value: matchingTags)
+            .order("rating", ascending: false)
+            .limit(8)
+            .execute()
+            .value
+    }
+
+    func fetchTrendingExperiences() async throws -> [ExperienceDTO] {
+        try await db.from("experiences").select()
+            .eq("is_trending", value: true)
+            .order("rating", ascending: false)
+            .limit(10)
             .execute()
             .value
     }

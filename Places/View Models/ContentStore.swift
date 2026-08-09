@@ -17,6 +17,7 @@ final class ContentStore {
     private(set) var categories: Loadable<[ExperienceCategoryDTO]> = .idle
     private(set) var experiencesByCity: [String: Loadable<[ExperienceDTO]>] = [:]
     private(set) var experiencesByCategory: [String: Loadable<[ExperienceDTO]>] = [:]
+    private(set) var forYou: Loadable<[ForYouItem]> = .idle
 
     private let content: ContentProviding
 
@@ -57,6 +58,29 @@ final class ContentStore {
                    force: force,
                    fetch: { try await self.content.fetchExperiences(cityId: cityId, categoryTag: categoryTag) },
                    failure: "Couldn't load experiences.")
+    }
+
+    func loadForYou(interests: [String], force: Bool = false) async {
+        if case .loaded = forYou, !force { return }
+        if case .loading = forYou { return }
+        forYou = .loading
+        do {
+            var items: [ForYouItem] = []
+            if !interests.isEmpty {
+                let destTags = ForYouMapping.destinationTags(for: interests)
+                async let experiences = content.fetchExperiences(categoryTags: interests)
+                async let destinations = destTags.isEmpty
+                    ? [DestinationDTO]() : content.fetchDestinations(matchingTags: destTags)
+                let (e, d) = try await (experiences, destinations)
+                items = interleaveForYou(destinations: d, experiences: e, cap: 10)
+            }
+            if items.isEmpty {
+                items = try await content.fetchTrendingExperiences().map(ForYouItem.experience)
+            }
+            forYou = .loaded(items)
+        } catch {
+            forYou = .failed("Couldn't load recommendations.")
+        }
     }
 
     /// Shared load routine: guards against refetch-when-loaded and duplicate

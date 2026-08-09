@@ -14,6 +14,7 @@ struct HomeTab: View {
 
     @Environment(\.router) private var router
     @Environment(ContentStore.self) private var content: ContentStore?
+    @Environment(SessionStore.self) private var session: SessionStore?
     @Environment(SponsoredViewModel.self) private var sponsoredModel
 
     @State private var selectedTrip: Trip?
@@ -24,13 +25,6 @@ struct HomeTab: View {
     @Query(sort: \SavedTrip.createdAt, order: .reverse) private var savedTrips: [SavedTrip]
     /// Real saved trips, falling back to sample data when the user has none yet.
     private var trips: [Trip] { savedTrips.isEmpty ? Trip.dummyTrips : savedTrips.map(\.displayTrip) }
-
-    private static let forYouItems: [FeedItem] = [
-        .init(image: "onboarding1", title: "Maasai Mara", subtitle: "Wild savanna & the Big Five"),
-        .init(image: "onboarding5", title: "Diani Beach", subtitle: "White sand & turquoise water"),
-        .init(image: "onboarding4", title: "Mount Kenya", subtitle: "Alpine treks above the clouds"),
-        .init(image: "onboarding3", title: "Zanzibar", subtitle: "Spice markets & old-town lanes"),
-    ]
 
     var body: some View {
         VStack(spacing: 28) {
@@ -54,6 +48,7 @@ struct HomeTab: View {
     }
 
     private func loadContent() async {
+        await content?.loadForYou(interests: session?.currentProfile?.interests ?? [])
         await content?.loadPopularDestinations()
         await content?.loadSponsored()
         await content?.loadCategories()
@@ -65,17 +60,28 @@ struct HomeTab: View {
     private var forYouSection: some View {
         VStack(spacing: 8) {
             SectionHeader(title: "For You", hasButton: false, action: {})
-            carousel(Self.forYouItems) { item in
-                Button {
-                    pushDetail(title: item.title, image: item.image)
-                } label: {
-                    PlaceCard(image: item.image, title: item.title, subtitle: item.subtitle,
-                              width: 300, imageHeight: 210,
-                              isSaved: savedIds.contains(item.id),
-                              onToggleSave: { toggleSave(item.id) })
+            loadableSection(content?.forYou,
+                            empty: "Tell us what you love to see picks here.",
+                            retry: { await content?.loadForYou(interests: session?.currentProfile?.interests ?? [], force: true) }) { items in
+                carousel(items) { item in
+                    Button {
+                        routeForYou(item)
+                    } label: {
+                        PlaceCard(image: item.imageURL, title: item.title, subtitle: item.subtitle,
+                                  width: 300, imageHeight: 210)
+                    }
+                    .buttonStyle(PressableButtonStyle())
                 }
-                .buttonStyle(PressableButtonStyle())
             }
+        }
+    }
+
+    private func routeForYou(_ item: ForYouItem) {
+        switch item {
+        case .destination(let dto):
+            pushDestination(dto)
+        case .experience(let dto):
+            router.showScreen(.push) { _ in ExperienceDetailView(experience: Experience(dto: dto)) }
         }
     }
 
@@ -290,13 +296,6 @@ struct HomeTab: View {
             ExploreDetailView(destination: dto)
         }
     }
-}
-
-private struct FeedItem: Identifiable {
-    let id = UUID()
-    let image: String
-    let title: String
-    let subtitle: String
 }
 
 #Preview {
