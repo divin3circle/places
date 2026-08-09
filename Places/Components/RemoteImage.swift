@@ -4,8 +4,9 @@
 //
 //  Drop-in for DownsampledAssetImage that auto-detects its source: an http(s)
 //  URL renders remotely (disk-cached by SDWebImage); anything else is a local
-//  asset name. Fills the frame the caller gives it — callers apply .frame/.clipShape,
-//  exactly as they did with DownsampledAssetImage.
+//  asset name. A Color.clear container drives layout so the image's intrinsic
+//  size never leaks into the caller's frame/overlay positioning; callers apply
+//  their own .frame/.clipShape, exactly as they did with DownsampledAssetImage.
 //
 
 import SwiftUI
@@ -24,10 +25,13 @@ struct RemoteImage: View {
 
     var body: some View {
         if source.hasPrefix("http"), let url = URL(string: source) {
-            WebImage(url: url)
-                .resizable()
-                .indicator(.activity)
-                .scaledToFill()
+            Color.clear
+                .overlay {
+                    WebImage(url: url)
+                        .resizable()
+                        .indicator(.activity)
+                        .scaledToFill()
+                }
         } else {
             DownsampledAssetImage(name: source, width: width, height: height)
         }

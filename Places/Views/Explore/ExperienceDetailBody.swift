@@ -58,7 +58,7 @@ struct ExperienceDetailBody: View {
         // The morph tucks the body top under the pinned hero, so add clearance
         // there to keep the host row (48pt avatar is the tallest) from being
         // clipped. The pushed detail (real gallery, not the morph) needs none.
-        .padding(.top, showsTitle ? 20 : 56)
+        .padding(.top, showsTitle ? 20 : 40)
     }
 
     private var hostRow: some View {
