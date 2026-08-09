@@ -19,6 +19,9 @@ struct PlacesApp: App {
         profiles: ProfileRepository()
     )
 
+    // Fetched Home/Explore content (in-memory).
+    @State private var content = ContentStore()
+
     var body: some Scene {
         WindowGroup {
             RouterView { _ in
@@ -27,6 +30,7 @@ struct PlacesApp: App {
             .edgesIgnoringSafeArea(.all)
             .preferredColorScheme(AppearanceMode(rawValue: appearanceRaw)?.colorScheme)
             .environment(session)
+            .environment(content)
             .task { await session.bootstrap() }
         }
         // On-device store for saved trips (no CloudKit).
