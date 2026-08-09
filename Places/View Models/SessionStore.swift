@@ -53,9 +53,11 @@ final class SessionStore {
         currentProfile?.interests = tags
     }
 
-    func completeOnboarding() async {
+    /// Marks the profile onboarded. Throws if the write fails so the caller can
+    /// keep the user on the tour and retry — never advance the gate on a failed write.
+    func completeOnboarding() async throws {
         guard let id = userID else { return }
-        try? await profiles.updateOnboardingComplete(true, id: id)
+        try await profiles.updateOnboardingComplete(true, id: id)
         defaults.set(true, forKey: mirrorKey)
         currentProfile?.onboardingComplete = true
         phase = .ready

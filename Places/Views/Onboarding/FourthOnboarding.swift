@@ -12,6 +12,8 @@ struct FourthOnboarding: View {
     @Environment(\.router) private var router
     @Environment(SessionStore.self) private var session: SessionStore?
     @State private var currentStep: Int = 3
+    @State private var isFinishing = false
+    @State private var toast: ToastData?
     var body: some View {
         VStack(spacing: 0) {
             ProgressViewer(steps: 4, currentStep: $currentStep)
@@ -54,14 +56,23 @@ struct FourthOnboarding: View {
         }
         .padding(.horizontal)
         .toolbar(.hidden, for: .navigationBar)
+        .disabled(isFinishing)
+        .toast($toast)
     }
-    
+
     private func navigateToHome() {
+        guard !isFinishing else { return }
+        isFinishing = true
         Task {
-            // Marks the profile onboarded (phase → .ready, AppTab becomes root),
-            // then pops the onboarding stack to reveal it.
-            await session?.completeOnboarding()
-            router.dismissAllScreens()
+            do {
+                // Marks the profile onboarded (phase → .ready, AppTab becomes root),
+                // then pops the onboarding stack to reveal it. Only advances on success.
+                try await session?.completeOnboarding()
+                router.dismissAllScreens()
+            } catch {
+                isFinishing = false
+                toast = ToastData(message: "Couldn't finish setup. Please try again.", isError: true)
+            }
         }
     }
 }

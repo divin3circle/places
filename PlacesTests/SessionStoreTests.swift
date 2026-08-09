@@ -33,10 +33,10 @@ struct SessionStoreTests {
         #expect(store.phase == .onboarding)
     }
 
-    @Test func completeOnboardingBecomesReadyAndPersists() async {
+    @Test func completeOnboardingBecomesReadyAndPersists() async throws {
         let (store, repo) = makeStore(restoreID: UUID(), profile: .fixture(onboardingComplete: false))
         await store.bootstrap()
-        await store.completeOnboarding()
+        try await store.completeOnboarding()
         #expect(store.phase == .ready)
         #expect(repo.stored.onboardingComplete == true)
     }
