@@ -63,6 +63,11 @@ struct UpcomingTripCard: View {
 }
 
 #Preview {
-    UpcomingTripCard(trip: .sample, onDetail: {})
-        .padding()
+    UpcomingTripCard(
+        trip: UpcomingTrip(id: UUID(), title: "Maasai Mara Safari",
+                           subtitle: "Golden plains and Big Five mornings.",
+                           coverImageName: "onboarding2", days: 8, placesCount: 12),
+        onDetail: {}
+    )
+    .padding()
 }

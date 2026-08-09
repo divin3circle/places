@@ -59,6 +59,6 @@ struct TripDetailSheet: View {
 #Preview {
     Color.clear
         .sheet(isPresented: .constant(true)) {
-            TripDetailSheet(trip: Trip.dummyTrips[0], onView: {}, onEdit: {})
+            TripDetailSheet(trip: Trip.previews[0], onView: {}, onEdit: {})
         }
 }

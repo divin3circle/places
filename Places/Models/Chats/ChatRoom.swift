@@ -77,7 +77,15 @@ extension ChatRoom {
     }
 
     static let mock: [ChatRoom] = {
-        let trips = Trip.dummyTrips
+        // Self-contained mock trips for the (not-yet-backed) Chats feature.
+        let trips: [Trip] = [
+            .init(title: "Serengeti Loop", coverImageName: "onboarding1", dateLabel: "Jul 2026"),
+            .init(title: "Zanzibar Coast", coverImageName: "onboarding2", dateLabel: "Jun 2026"),
+            .init(title: "Amboseli", coverImageName: "onboarding3", dateLabel: "May 2026"),
+            .init(title: "Ngorongoro", coverImageName: "onboarding4", dateLabel: "Apr 2026"),
+            .init(title: "Lake Nakuru", coverImageName: "onboarding5", dateLabel: "Mar 2026"),
+            .init(title: "Mount Kenya", coverImageName: "onboarding1", dateLabel: "Dec 2025"),
+        ]
         return [
             ChatRoom(
                 kind: .tripGroup, trip: trips[0],

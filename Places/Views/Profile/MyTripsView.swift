@@ -6,11 +6,15 @@
 //
 
 import SwiftUI
+import SwiftData
 
-/// Instagram-style grid of the user's past generated / used itineraries.
-/// Pushed from the profile settings via SwiftfulRouting. Dummy data for now.
+/// Instagram-style grid of the user's saved trips, with an empty state until
+/// they convert their first itinerary.
+/// Pushed from the profile settings via SwiftfulRouting.
 struct MyTripsView: View {
-    private let trips = Trip.dummyTrips
+    @Query(sort: \SavedTrip.createdAt, order: .reverse) private var savedTrips: [SavedTrip]
+    private var trips: [Trip] { savedTrips.map(\.displayTrip) }
+
     private let columns = [
         GridItem(.flexible(), spacing: 3),
         GridItem(.flexible(), spacing: 3),
@@ -19,12 +23,17 @@ struct MyTripsView: View {
 
     var body: some View {
         ScrollView(.vertical) {
-            LazyVGrid(columns: columns, spacing: 3) {
-                ForEach(trips) { trip in
-                    TripCell(trip: trip)
+            if trips.isEmpty {
+                ContentEmptyState(icon: "suitcase", message: "Your saved trips will appear here.\nPlan one to get started.")
+                    .padding(.top, 80)
+            } else {
+                LazyVGrid(columns: columns, spacing: 3) {
+                    ForEach(trips) { trip in
+                        TripCell(trip: trip)
+                    }
                 }
+                .padding(.horizontal, 3)
             }
-            .padding(.horizontal, 3)
         }
         .scrollIndicators(.hidden)
         .navigationTitle("My Trips")

@@ -23,8 +23,8 @@ struct HomeTab: View {
     @State private var city: EACity = .nairobi
 
     @Query(sort: \SavedTrip.createdAt, order: .reverse) private var savedTrips: [SavedTrip]
-    /// Real saved trips, falling back to sample data when the user has none yet.
-    private var trips: [Trip] { savedTrips.isEmpty ? Trip.dummyTrips : savedTrips.map(\.displayTrip) }
+    /// The user's saved itineraries; empty until they convert one.
+    private var trips: [Trip] { savedTrips.map(\.displayTrip) }
 
     var body: some View {
         VStack(spacing: 28) {
@@ -88,14 +88,18 @@ struct HomeTab: View {
     private var myTripsSection: some View {
         VStack(spacing: 8) {
             SectionHeader(title: "My Trips", hasButton: true, action: {})
-            carousel(trips) { trip in
-                Button {
-                    selectedTrip = trip
-                } label: {
-                    PlaceCard(image: trip.coverImageName, title: trip.title, subtitle: trip.subtitle,
-                              width: 200, imageHeight: 150)
+            if trips.isEmpty {
+                ContentEmptyState(icon: "suitcase", message: "Plan a trip and it'll show up here.")
+            } else {
+                carousel(trips) { trip in
+                    Button {
+                        selectedTrip = trip
+                    } label: {
+                        PlaceCard(image: trip.coverImageName, title: trip.title, subtitle: trip.subtitle,
+                                  width: 200, imageHeight: 150)
+                    }
+                    .buttonStyle(PressableButtonStyle())
                 }
-                .buttonStyle(PressableButtonStyle())
             }
         }
     }

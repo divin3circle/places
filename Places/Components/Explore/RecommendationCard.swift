@@ -8,16 +8,18 @@
 import SwiftUI
 
 /// A destination shown as a fanned stack of photos with a name label — the
-/// "Recommendations" carousel item.
+/// "Recommendations" carousel item. `images` may be remote URLs or asset names;
+/// `RemoteImage` handles both.
 struct RecommendationCard: View {
-    let destination: RecommendedDestination
+    let name: String
+    let images: [String]
 
     var body: some View {
         VStack(spacing: 10) {
             ZStack {
-                ForEach(Array(destination.imageNames.prefix(3).enumerated()), id: \.offset) { index, name in
+                ForEach(Array(images.prefix(3).enumerated()), id: \.offset) { index, source in
                     let position = index - 1 // -1, 0, 1 → left, center, right
-                    DownsampledAssetImage(name: name, width: 72, height: 94)
+                    RemoteImage(source, width: 72, height: 94)
                         .frame(width: 72, height: 94)
                         .clipShape(.rect(cornerRadius: 14))
                         .overlay(RoundedRectangle(cornerRadius: 14).stroke(.background, lineWidth: 2))
@@ -29,7 +31,7 @@ struct RecommendationCard: View {
             }
             .frame(width: 110, height: 104)
 
-            Text(destination.name)
+            Text(name)
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .foregroundStyle(.primary)
         }
@@ -38,5 +40,5 @@ struct RecommendationCard: View {
 }
 
 #Preview {
-    RecommendationCard(destination: .samples[0])
+    RecommendationCard(name: "Maasai Mara", images: ["onboarding1", "sample", "onboarding3"])
 }

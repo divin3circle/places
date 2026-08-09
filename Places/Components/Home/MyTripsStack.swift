@@ -90,7 +90,7 @@ struct MyTripCard: View {
 }
 
 struct MyTripsStack: View {
-  var trips: [Trip] = Trip.dummyTrips
+  var trips: [Trip] = []
   var autoAdvanceSeconds: UInt64 = 8
   var onView: (Trip) -> Void = { _ in }
   var onEdit: (Trip) -> Void = { _ in }
@@ -228,6 +228,6 @@ private struct StackedTrip: Identifiable {
 }
 
 #Preview {
-  MyTripsStack()
+  MyTripsStack(trips: Trip.previews)
     .padding()
 }
