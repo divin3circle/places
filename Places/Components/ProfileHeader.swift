@@ -14,8 +14,11 @@ struct ProfileHeader: View {
     @Binding var isLargerHeader: Bool
     @Binding var topInset: CGFloat
 
-    private let profile = UserProfile.current
-    
+    @Environment(SessionStore.self) private var session: SessionStore?
+
+    private var displayName: String { session?.currentProfile?.name ?? "Traveler" }
+    private var displayEmail: String { session?.currentProfile?.email ?? "" }
+
     var body: some View {
         VStack(spacing: 12) {
             Rectangle()
@@ -75,12 +78,12 @@ struct ProfileHeader: View {
     @ViewBuilder
     private func CustomNavigationBar() -> some View {
         VStack(alignment: .center, spacing: 6) {
-            Text(profile.name)
+            Text(displayName)
                 .fontDesign(.rounded)
                 .font(.title)
                 .fontWeight(.semibold)
 
-            Text(profile.email)
+            Text(displayEmail)
                 .foregroundStyle(.gray.opacity(0.9))
                 .font(.system(size: 16))
                 .fontDesign(.rounded)
@@ -154,7 +157,10 @@ struct ProfileHeader: View {
             CustomActionButton(isLargerHeader: isLargerHeader, icon: "wallet.bifold.fill", title: "Wallet", onTap: {
                 router.showScreen(.push) { _ in Wallets() }
             })
-            CustomActionButton(isLargerHeader: isLargerHeader, icon: "rectangle.portrait.and.arrow.forward", title: "Logout", onTap: {})
+            CustomActionButton(isLargerHeader: isLargerHeader, icon: "rectangle.portrait.and.arrow.forward", title: "Logout", onTap: {
+                router.dismissAllScreens()
+                Task { await session?.signOut() }
+            })
             CustomActionButton(isLargerHeader: isLargerHeader, icon: "ellipsis", title: "More", onTap: {})
         }
     }

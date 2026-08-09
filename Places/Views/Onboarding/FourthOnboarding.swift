@@ -10,13 +10,14 @@ import SwiftfulRouting
 
 struct FourthOnboarding: View {
     @Environment(\.router) private var router
+    @Environment(SessionStore.self) private var session: SessionStore?
     @State private var currentStep: Int = 3
     var body: some View {
         VStack(spacing: 0) {
             ProgressViewer(steps: 4, currentStep: $currentStep)
                 .microAnimations(delay: 0.09, slideDirection: .Top, offsetAmount: 0)
             Spacer(minLength: 0)
-            LottieAnimationLoader(fileName: "onboarding-animation", loop: true, loopCount: 2, autoPlay: true)
+            LottieAnimationLoader(fileName: "travel", loop: true, loopCount: 2, autoPlay: true)
                 .frame(maxWidth: .infinity)
                 .frame(height: 350)
                 .microAnimations(delay: 0.1, slideDirection: .Left, offsetAmount: 0)
@@ -56,8 +57,11 @@ struct FourthOnboarding: View {
     }
     
     private func navigateToHome() {
-        router.showScreen(.push) { _ in
-            AppTab()
+        Task {
+            // Marks the profile onboarded (phase → .ready, AppTab becomes root),
+            // then pops the onboarding stack to reveal it.
+            await session?.completeOnboarding()
+            router.dismissAllScreens()
         }
     }
 }

@@ -30,10 +30,10 @@ extension CuratedTrip {
 
     /// A small set of interests used as the filter row (label + icon + category).
     static let filters: [TravelInterest] = [
-        .init(label: "Safari", icon: "binoculars.fill", category: "wildlife_core"),
-        .init(label: "Trekking", icon: "figure.hiking", category: "trekking_primates"),
-        .init(label: "Beaches", icon: "sun.max.fill", category: "coastal_relaxation"),
-        .init(label: "Culture", icon: "building.columns.fill", category: "arts_culture"),
-        .init(label: "Nature", icon: "leaf.fill", category: "eco_conservation")
+        .init(label: "Safari", icon: "binoculars.fill", categoryTag: "wildlife_core"),
+        .init(label: "Trekking", icon: "figure.hiking", categoryTag: "trekking_primates"),
+        .init(label: "Beaches", icon: "sun.max.fill", categoryTag: "coastal_relaxation"),
+        .init(label: "Culture", icon: "building.columns.fill", categoryTag: "arts_culture"),
+        .init(label: "Nature", icon: "leaf.fill", categoryTag: "eco_conservation")
     ]
 }

@@ -91,9 +91,9 @@ struct ExploreTab: View {
                         FilterPill(
                             icon: filter.icon,
                             label: filter.label,
-                            isSelected: selectedCategory == filter.category
+                            isSelected: selectedCategory == filter.categoryTag
                         ) {
-                            selectedCategory = filter.category
+                            selectedCategory = filter.categoryTag
                         }
                     }
                 }

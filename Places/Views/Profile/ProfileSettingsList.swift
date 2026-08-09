@@ -16,8 +16,10 @@ struct ProfileSettingsList: View {
     @Environment(\.requestReview) private var requestReview
 
     @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.system.rawValue
+    @AppStorage(AIPreferenceKey.model) private var aiModelRaw = ""
+    @State private var showModelPicker = false
 
-    private let profile = UserProfile.current
+    @Environment(SessionStore.self) private var session: SessionStore?
 
     private let termsURL = URL(string: "https://places.app/terms")!
     private let privacyURL = URL(string: "https://places.app/privacy")!
@@ -37,6 +39,7 @@ struct ProfileSettingsList: View {
             preferencesSection
             tripsSection
             supportSection
+            accountActionsSection
 
             Divider()
                 .padding(.top, 24)
@@ -49,6 +52,13 @@ struct ProfileSettingsList: View {
         .padding(.horizontal, 20)
         .padding(.top, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .sheet(isPresented: $showModelPicker) {
+            ModelPickerSheet()
+        }
+    }
+
+    private var aiModelLabel: String {
+        AIModelKind(rawValue: aiModelRaw)?.title ?? "Not set"
     }
 
     private var versionString: String {
@@ -57,21 +67,43 @@ struct ProfileSettingsList: View {
         return "Version \(version) (\(build))"
     }
 
-    private var accountSection: some View {
+    private var accountActionsSection: some View {
         SettingsSection {
-            SettingsRow(icon: "envelope", title: "Email", accessory: .value(profile.email))
-            SettingsRow(icon: "person", title: "Name", accessory: .value(profile.name))
             SettingsRow(
-                icon: "shippingbox",
-                title: "Current plan",
-                accessory: .badge(text: profile.plan.rawValue, tint: profile.plan.tint)
+                icon: "arrow.counterclockwise",
+                title: "Reset onboarding (debug)",
+                accessory: .chevron,
+                onTap: resetOnboarding
+            )
+            SettingsRow(
+                icon: "rectangle.portrait.and.arrow.forward",
+                title: "Log out",
+                accessory: .chevron,
+                onTap: logout
             )
         }
+        .padding(.top, 25)
+    }
+
+    private func logout() {
+        router.dismissAllScreens()
+        Task { await session?.signOut() }
+    }
+
+    private func resetOnboarding() {
+        router.dismissAllScreens()
+        Task { await session?.resetOnboarding() }
     }
 
     private var preferencesSection: some View {
         SettingsSection {
             AppearancePickerRow(selection: appearance)
+            SettingsRow(
+                icon: "sparkles",
+                title: "AI model",
+                accessory: .value(aiModelLabel),
+                onTap: { showModelPicker = true }
+            )
             SettingsRow(
                 icon: "bell",
                 title: "Notifications",

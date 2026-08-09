@@ -2,17 +2,24 @@
 //  ContentView.swift
 //  Places
 //
-//  Created by Sylus Abel on 27/07/2026.
+//  Root gate: shows the right surface for the current auth phase.
 //
 
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        Auth()
-    }
-}
+    @Environment(SessionStore.self) private var session: SessionStore?
 
-#Preview {
-    ContentView()
+    var body: some View {
+        switch session?.phase ?? .booting {
+        case .booting:
+            SplashView()
+        case .signedOut:
+            Auth()
+        case .onboarding:
+            OnboardingFlow()
+        case .ready:
+            AppTab()
+        }
+    }
 }

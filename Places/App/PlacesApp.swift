@@ -7,10 +7,17 @@
 
 import SwiftUI
 import SwiftfulRouting
+import SwiftData
 
 @main
 struct PlacesApp: App {
     @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.system.rawValue
+
+    // Single source of truth for auth phase + current profile.
+    @State private var session = SessionStore(
+        auth: SupabaseAuthProvider(),
+        profiles: ProfileRepository()
+    )
 
     var body: some Scene {
         WindowGroup {
@@ -19,6 +26,10 @@ struct PlacesApp: App {
             }
             .edgesIgnoringSafeArea(.all)
             .preferredColorScheme(AppearanceMode(rawValue: appearanceRaw)?.colorScheme)
+            .environment(session)
+            .task { await session.bootstrap() }
         }
+        // On-device store for saved trips (no CloudKit).
+        .modelContainer(for: [SavedTrip.self, SavedItineraryVersion.self])
     }
 }

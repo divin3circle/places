@@ -3,6 +3,7 @@ import SwiftfulRouting
 
 struct SecondOnboarding: View {
     @Environment(\.router) var router
+    @Environment(SessionStore.self) private var session: SessionStore?
     @State private var selectedInterests: Set<TravelInterest> = []
     @State private var currentStep = 1
     // Shuffle once, not on every re-render, so the scene isn't churned.
@@ -51,7 +52,9 @@ struct SecondOnboarding: View {
     }
     
     private func navigateToThirdOnboarding() {
-        router.showScreen(.push){_ in 
+        // Persist the picked interests as deduped category tags.
+        Task { await session?.saveInterests(categoryTags(for: selectedInterests)) }
+        router.showScreen(.push){_ in
             ThirdOnboarding()
         }
     }

@@ -1,5 +1,5 @@
 {
-  "originHash" : "3d55cc9c0baa9538a80169ac11c13c072942539fba98a94dd22cbb92661e74a2",
+  "originHash" : "f1db18dd86acc6461384e6308360aa1f007486ecf3d6b9e3171c5f80b88ae5a1",
   "pins" : [
     {
       "identity" : "dotlottie-ios",
@@ -8,6 +8,15 @@
       "state" : {
         "branch" : "main",
         "revision" : "3940beca42e273bc813fd002d1ddc59ff5dd4e76"
+      }
+    },
+    {
+      "identity" : "rive-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/rive-app/rive-ios",
+      "state" : {
+        "revision" : "a1dffeec37e8bd7698694f765b9bf1768f1a3fe5",
+        "version" : "6.22.1"
       }
     },
     {
@@ -29,6 +38,60 @@
       }
     },
     {
+      "identity" : "supabase-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/supabase/supabase-swift",
+      "state" : {
+        "revision" : "b118484ae0eb4a6b6ce1b216711d660baf6ec1aa",
+        "version" : "2.54.1"
+      }
+    },
+    {
+      "identity" : "swift-asn1",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-asn1.git",
+      "state" : {
+        "revision" : "a9a5efd40eaf558a2bcd48d64b1d1646be686008",
+        "version" : "1.7.1"
+      }
+    },
+    {
+      "identity" : "swift-clocks",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/swift-clocks",
+      "state" : {
+        "revision" : "72d749bf341b78851203066ab421869b783ec42a",
+        "version" : "1.1.0"
+      }
+    },
+    {
+      "identity" : "swift-concurrency-extras",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/swift-concurrency-extras",
+      "state" : {
+        "revision" : "5fa253428866f2360c3754e88537f700ed2656b5",
+        "version" : "1.4.1"
+      }
+    },
+    {
+      "identity" : "swift-crypto",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-crypto.git",
+      "state" : {
+        "revision" : "47d3869a7291f085c1fb9fb1e6d3b97a793f45c6",
+        "version" : "4.5.1"
+      }
+    },
+    {
+      "identity" : "swift-http-types",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-http-types.git",
+      "state" : {
+        "revision" : "db774a277f60063a32d854f2980299caf06da041",
+        "version" : "1.6.0"
+      }
+    },
+    {
       "identity" : "swiftfulrecursiveui",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SwiftfulThinking/SwiftfulRecursiveUI.git",
@@ -44,6 +107,15 @@
       "state" : {
         "revision" : "6c2ec4ba512c6ee6f567ce4cb135f207dc7e283c",
         "version" : "6.2.2"
+      }
+    },
+    {
+      "identity" : "xctest-dynamic-overlay",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
+      "state" : {
+        "revision" : "8f6abcf4c8950e2679d5b2fee4ca284fd7c34886",
+        "version" : "1.11.0"
       }
     }
   ],
