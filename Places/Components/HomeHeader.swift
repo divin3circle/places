@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HomeHeader: View {
   var onProfileTap: () -> Void = {}
+  @Environment(SessionStore.self) private var session: SessionStore?
 
   var body: some View {
     ZStack {
@@ -16,15 +17,21 @@ struct HomeHeader: View {
         Button {
           onProfileTap()
         } label: {
-          Image("profile")
-            .resizable()
-            .scaledToFill()
-            .frame(width: 38, height: 38)
-            .clipShape(Circle())
-            .overlay {
-              Circle()
-                .stroke(.gray.opacity(0.1), lineWidth: 1)
+          Group {
+            if let url = session?.currentProfile?.avatarURL, !url.isEmpty {
+              RemoteImage(url, width: 38, height: 38)
+            } else {
+              Image("profile")
+                .resizable()
+                .scaledToFill()
             }
+          }
+          .frame(width: 38, height: 38)
+          .clipShape(Circle())
+          .overlay {
+            Circle()
+              .stroke(.gray.opacity(0.1), lineWidth: 1)
+          }
         }
         .buttonStyle(.plain)
         Spacer()
