@@ -20,7 +20,7 @@ struct PlacesApp: App {
     )
 
     // Fetched Home/Explore content (in-memory).
-    @State private var content = ContentStore()
+    @State private var content = ContentStore(content: SupabaseContentRepository())
 
     var body: some Scene {
         WindowGroup {
