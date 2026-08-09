@@ -16,7 +16,7 @@ struct UpcomingTripCard: View {
     var body: some View {
         VStack(spacing: 14) {
             HStack(spacing: 14) {
-                DownsampledAssetImage(name: trip.coverImageName, width: 76, height: 76)
+                RemoteImage(trip.coverImageName, width: 76, height: 76)
                     .frame(width: 76, height: 76)
                     .clipShape(.rect(cornerRadius: 16))
 

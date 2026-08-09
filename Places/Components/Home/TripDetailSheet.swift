@@ -13,7 +13,7 @@ struct TripDetailSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            DownsampledAssetImage(name: trip.coverImageName, width: 360, height: 180)
+            RemoteImage(trip.coverImageName, width: 360, height: 180)
                 .frame(height: 180)
                 .frame(maxWidth: .infinity)
                 .clipShape(.rect(cornerRadius: 20, style: .continuous))

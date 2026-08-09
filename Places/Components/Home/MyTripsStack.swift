@@ -15,7 +15,7 @@ struct MyTripCard: View {
 
   var body: some View {
     ZStack {
-      DownsampledAssetImage(name: trip.coverImageName, width: 340, height: 340)
+      RemoteImage(trip.coverImageName, width: 340, height: 340)
         .frame(maxWidth: .infinity)
         .frame(height: 340)
         .clipped()

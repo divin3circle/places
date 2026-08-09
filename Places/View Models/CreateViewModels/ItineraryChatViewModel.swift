@@ -212,10 +212,13 @@ final class ItineraryChatViewModel {
     }
 
     /// First resolvable place image across the itinerary, for the trip cover.
+    /// Prefers the grounded remote URL (RemoteImage renders it); falls back to a
+    /// local asset name only if a place somehow carries one instead.
     private func coverImageName(for itinerary: GeneratedItinerary) -> String? {
         for day in itinerary.days {
             for activity in day.activities {
-                if let place = registry.resolve(activity.placeName), let image = place.imageName {
+                if let place = registry.resolve(activity.placeName),
+                   let image = place.imageURL?.absoluteString ?? place.imageName {
                     return image
                 }
             }

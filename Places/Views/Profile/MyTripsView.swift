@@ -43,8 +43,7 @@ struct MyTripsView: View {
     @ViewBuilder
     private func TripCell(trip: Trip) -> some View {
         // TODO: push a trip-detail screen when one exists.
-        Image(trip.coverImageName)
-            .resizable()
+        RemoteImage(trip.coverImageName, width: 240, height: 240)
             .aspectRatio(1, contentMode: .fill)
             .frame(maxWidth: .infinity)
             .clipped()
