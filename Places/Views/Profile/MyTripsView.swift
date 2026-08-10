@@ -24,26 +24,33 @@ struct MyTripsView: View {
 
     var body: some View {
         ScrollView(.vertical) {
-            if savedTrips.isEmpty {
-                ContentEmptyState(icon: "suitcase", message: "Your saved trips will appear here.\nPlan one to get started.")
-                    .padding(.top, 80)
-            } else {
-                LazyVGrid(columns: columns, spacing: 3) {
-                    ForEach(savedTrips) { saved in
-                        Button {
-                            router.showScreen(.push) { _ in TripView(trip: saved) }
-                        } label: {
-                            TripCell(trip: saved.displayTrip)
+            VStack(alignment: .leading, spacing: 16) {
+                Text("My Trips")
+                    .font(.largeTitle.bold())
+                    .fontDesign(.rounded)
+                    .fontWidth(.expanded)
+                    .padding(.horizontal, 12)
+                    .padding(.top, 8)
+
+                if savedTrips.isEmpty {
+                    ContentEmptyState(icon: "suitcase", message: "Your saved trips will appear here.\nPlan one to get started.")
+                        .padding(.top, 60)
+                } else {
+                    LazyVGrid(columns: columns, spacing: 3) {
+                        ForEach(savedTrips) { saved in
+                            Button {
+                                router.showScreen(.push) { _ in TripView(trip: saved) }
+                            } label: {
+                                TripCell(trip: saved.displayTrip)
+                            }
+                            .buttonStyle(PressableButtonStyle())
                         }
-                        .buttonStyle(PressableButtonStyle())
                     }
+                    .padding(.horizontal, 3)
                 }
-                .padding(.horizontal, 3)
             }
         }
         .scrollIndicators(.hidden)
-        .navigationTitle("My Trips")
-        .navigationBarTitleDisplayMode(.inline)
     }
 
     @ViewBuilder

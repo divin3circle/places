@@ -41,6 +41,14 @@ struct AppTab: View {
                     .toolbar(.hidden, for: .navigationBar)
                     .safeAreaPadding([.bottom], 15)
             }
+            Tab.init(value: .trips) {
+                MyTripsView()
+                    .adoptForCustomTabBar($progress)
+                    .hideNativeTabBar()
+                    .scrollIndicators(.hidden)
+                    .toolbar(.hidden, for: .navigationBar)
+                    .safeAreaPadding([.bottom], 15)
+            }
             // Lounges (Chats) is hidden for v1 — no messaging backend yet. Restore
             // this Tab + the .lounges entry in CustomTabBar when Chats is built.
             Tab.init(value: .profile) {

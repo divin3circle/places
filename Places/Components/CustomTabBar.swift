@@ -27,8 +27,9 @@ struct CustomTabBar: View {
 
     private let leadingTabs: [AppTabs] = [.home, .explore]
     // Lounges (Chats) hidden for v1 — no messaging backend yet. Add .lounges back
-    // here (and its Tab in AppTab) when the Chats feature ships.
-    private let trailingTabs: [AppTabs] = [.profile]
+    // when the Chats feature ships. Trips fills the slot so the create button
+    // stays centered (two tabs on each side).
+    private let trailingTabs: [AppTabs] = [.trips, .profile]
 
     var body: some View {
         HStack(spacing: 0) {
