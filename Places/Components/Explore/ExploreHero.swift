@@ -17,26 +17,32 @@ struct ExploreHero: View {
     var topInset: CGFloat = 0
 
     var body: some View {
-        heroImage
-            .frame(height: 400 + topInset)
-            .frame(maxWidth: .infinity)
-            .clipped()
-            .overlay { scrim }
-            .overlay(alignment: .top) { statusBarBlur }
-            .overlay(alignment: .topLeading) { headline }
-            .overlay(alignment: .bottom) {
-                ExploreSearchBar(text: $searchText)
-                    .padding(16)
-            }
-    }
+        let base: CGFloat = 400 + topInset
+        GeometryReader { proxy in
+            // Positive when the scroll is pulled down past the top (overscroll);
+            // grow the hero by that amount so the image stretches instead of
+            // revealing whitespace.
+            let minY = proxy.frame(in: .scrollView(axis: .vertical)).minY
+            let stretch = max(minY, 0)
 
-    private var heroImage: some View {
-        DownsampledAssetImage(
-            name: "onboarding2",
-            width: UIScreen.main.bounds.width,
-            height: 400 + topInset,
-            contentMode: .fill
-        )
+            Image("onboarding2")
+                .resizable()
+                .scaledToFill()
+                .frame(width: proxy.size.width, height: base + stretch)
+                .clipped()
+                .overlay { scrim }
+                .overlay(alignment: .top) { statusBarBlur }
+                .overlay(alignment: .topLeading) { headline }
+                .overlay(alignment: .bottom) {
+                    ExploreSearchBar(text: $searchText)
+                        .padding(16)
+                }
+                // Pin the bottom to the base frame; the extra height grows upward
+                // into the pulled-down space.
+                .offset(y: -stretch)
+        }
+        .frame(height: base)
+        .frame(maxWidth: .infinity)
     }
 
     private var scrim: some View {
