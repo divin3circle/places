@@ -19,6 +19,8 @@ struct HomeTab: View {
 
     @State private var selectedSavedTrip: SavedTrip?
     @State private var tripToOpen: SavedTrip?
+    @State private var tripToEdit: SavedTrip?
+    @State private var editingTrip: SavedTrip?
     @State private var savedIds: Set<UUID> = []
     @State private var savedExperienceIds: Set<UUID> = []
     @State private var city: EACity = .nairobi
@@ -38,17 +40,23 @@ struct HomeTab: View {
         .padding(.bottom, 10)
         .task { await loadContent() }
         .sheet(item: $selectedSavedTrip, onDismiss: {
-            // Defer the push until the sheet has fully dismissed (avoids a race).
+            // Defer navigation until the sheet has fully dismissed (avoids a race).
             if let trip = tripToOpen {
                 tripToOpen = nil
                 router.showScreen(.push) { _ in TripView(trip: trip) }
+            } else if let trip = tripToEdit {
+                tripToEdit = nil
+                editingTrip = trip
             }
         }) { saved in
             TripDetailSheet(
                 trip: saved.displayTrip,
                 onView: { tripToOpen = saved; selectedSavedTrip = nil },
-                onEdit: { selectedSavedTrip = nil }   // TODO: open the Trip in AI chat mode
+                onEdit: { tripToEdit = saved; selectedSavedTrip = nil }
             )
+        }
+        .fullScreenCover(item: $editingTrip) { trip in
+            GenerateItineraryView(trip: trip)
         }
     }
 

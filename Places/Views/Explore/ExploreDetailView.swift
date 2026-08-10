@@ -8,9 +8,10 @@
 import SwiftUI
 import SDWebImageSwiftUI
 
-/// Destination detail pushed from Explore/Home cards. When opened from a live
-/// `DestinationDTO` it renders real data; the legacy `title/imageName` init is
-/// still used by not-yet-wired sections (For You / Recommendations / Curated).
+/// Destination detail pushed from Explore/Home cards. Opened from a live
+/// `DestinationDTO` it renders real data (description, fee, tags); the lightweight
+/// `title/imageName` init (e.g. a saved trip's cover tap) shows only what it knows
+/// — no fabricated blurb/tags.
 struct ExploreDetailView: View {
     let title: String
     let imageName: String
@@ -32,12 +33,8 @@ struct ExploreDetailView: View {
         self.dto = destination
     }
 
-    private var blurb: String? {
-        dto?.description ?? Destination.samples.first?.description
-    }
-    private var tags: [String] {
-        dto?.interestTags ?? Destination.samples.first?.interestTags ?? []
-    }
+    private var blurb: String? { dto?.description }
+    private var tags: [String] { dto?.interestTags ?? [] }
 
     var body: some View {
         ScrollView {

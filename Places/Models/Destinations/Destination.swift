@@ -65,37 +65,6 @@ struct ExtraLogistics: Codable, Hashable {
 }
 
 extension Destination {
-    static let samples: [Destination] = [
-        Destination(
-            id: "ke_maasai_mara_national_reserve",
-            name: "Maasai Mara National Reserve",
-            category: "national_park",
-            countryCode: "KE",
-            latitude: -1.4931,
-            longitude: 35.1439,
-            description: "Kenya's most iconic wildlife reserve, renowned for the Great Wildebeest Migration, exceptional Big Five sightings, expansive savannah landscapes, and year-round safari experiences. The reserve borders Tanzania's Serengeti National Park, forming one of Africa's richest wildlife ecosystems.",
-            bannerUrl: "",
-            images: [],
-            nonResidentFeeUsd: 200.00,
-            vehicleFeeGuidelines: "Vehicle entry fees are charged separately. Typical safari vehicles (6–12 seats) are charged approximately KES 1,500 per day. Larger vehicles attract higher fees.",
-            paymentInfrastructure: "Card payments are accepted at all major gates. Some gates also accept cash (USD or KES). Tour operators typically prepay park fees. Online payment is recommended where available.",
-            interestTags: [
-                "big_five",
-                "great_migration",
-                "wildlife_core",
-                "photography",
-                "game_drive",
-                "luxury_safari",
-                "birdwatching",
-                "family_friendly"
-            ],
-            extraLogistics: ExtraLogistics(
-                bestSeason: "July - October (Great Migration); December - February for excellent wildlife viewing.",
-                closestHub: "Keekorok Airstrip (within reserve); Nairobi (approximately 45 minutes by scheduled flight or 5-6 hours by road)."
-            )
-        )
-    ]
-    
     func getUIFriendlyTag(_ tag: String) -> String {
         return tag.split(separator: "_").joined(separator: " ")
     }
