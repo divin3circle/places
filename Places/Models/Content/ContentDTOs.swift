@@ -29,7 +29,7 @@ nonisolated struct DestinationDTO: Codable, Identifiable {
     let bestTimeToVisit: String?
     let priceRange: String?
     let isPopular: Bool
-    let bookingUrl: String?
+    var bookingUrl: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case id, name, category, latitude, longitude, description, images, rating
@@ -71,7 +71,7 @@ nonisolated struct ExperienceDTO: Codable, Identifiable {
     let description: String
     let latitude: Double?
     let longitude: Double?
-    let bookingUrl: String?
+    var bookingUrl: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case id, title, images, currency, rating, language, description, latitude, longitude

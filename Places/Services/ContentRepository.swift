@@ -9,7 +9,7 @@
 import Foundation
 import Supabase
 
-protocol ContentProviding {
+nonisolated protocol ContentProviding {
     func fetchPopularDestinations() async throws -> [DestinationDTO]
     func fetchSponsored() async throws -> [SponsoredDTO]
     func fetchCategories() async throws -> [ExperienceCategoryDTO]
@@ -19,7 +19,7 @@ protocol ContentProviding {
     func fetchTrendingExperiences() async throws -> [ExperienceDTO]
 }
 
-struct SupabaseContentRepository: ContentProviding {
+nonisolated struct SupabaseContentRepository: ContentProviding {
     private var db: SupabaseClient { SupabaseService.client }
 
     func fetchPopularDestinations() async throws -> [DestinationDTO] {

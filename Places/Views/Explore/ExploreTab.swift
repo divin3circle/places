@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftfulRouting
 import SwiftData
+import MapKit
 
 /// The Explore discovery screen: hero + search, the traveler's most recent
 /// planned trip, and live destination recommendations from Supabase.
@@ -49,6 +50,7 @@ struct ExploreTab: View {
 
                     VStack(alignment: .leading, spacing: 24) {
                         transportSection
+                        mapSection
                         upcomingSection
                         recommendationsSection
                     }
@@ -92,6 +94,35 @@ struct ExploreTab: View {
                 .foregroundStyle(.primary)
         }
         .frame(width: 72)
+    }
+
+    private var mapSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionTitle("Explore the map")
+            Button {
+                router.showScreen(.push) { _ in ExploreMapView() }
+            } label: {
+                ZStack(alignment: .bottomLeading) {
+                    Map(initialPosition: .region(MKCoordinateRegion(
+                        center: .init(latitude: -1.0, longitude: 36.5),
+                        span: .init(latitudeDelta: 7, longitudeDelta: 7))),
+                        interactionModes: [])
+                        .mapStyle(.standard(pointsOfInterest: .excludingAll))
+                        .allowsHitTesting(false)
+
+                    LinearGradient(colors: [.clear, .black.opacity(0.5)],
+                                   startPoint: .center, endPoint: .bottom)
+
+                    Label("Browse destinations & experiences", systemImage: "map.fill")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(14)
+                }
+                .frame(height: 150)
+                .clipShape(.rect(cornerRadius: 20, style: .continuous))
+            }
+            .buttonStyle(PressableButtonStyle())
+        }
     }
 
     private var upcomingSection: some View {
