@@ -17,14 +17,13 @@ struct HomeTab: View {
     @Environment(SessionStore.self) private var session: SessionStore?
     @Environment(SponsoredViewModel.self) private var sponsoredModel
 
-    @State private var selectedTrip: Trip?
+    @State private var selectedSavedTrip: SavedTrip?
+    @State private var tripToOpen: SavedTrip?
     @State private var savedIds: Set<UUID> = []
     @State private var savedExperienceIds: Set<UUID> = []
     @State private var city: EACity = .nairobi
 
     @Query(sort: \SavedTrip.createdAt, order: .reverse) private var savedTrips: [SavedTrip]
-    /// The user's saved itineraries; empty until they convert one.
-    private var trips: [Trip] { savedTrips.map(\.displayTrip) }
 
     var body: some View {
         VStack(spacing: 28) {
@@ -38,11 +37,17 @@ struct HomeTab: View {
         .padding(.top, 4)
         .padding(.bottom, 10)
         .task { await loadContent() }
-        .sheet(item: $selectedTrip) { trip in
+        .sheet(item: $selectedSavedTrip, onDismiss: {
+            // Defer the push until the sheet has fully dismissed (avoids a race).
+            if let trip = tripToOpen {
+                tripToOpen = nil
+                router.showScreen(.push) { _ in TripView(trip: trip) }
+            }
+        }) { saved in
             TripDetailSheet(
-                trip: trip,
-                onView: { selectedTrip = nil },  // TODO: navigate to the Trip view
-                onEdit: { selectedTrip = nil }   // TODO: open the Trip in AI chat mode
+                trip: saved.displayTrip,
+                onView: { tripToOpen = saved; selectedSavedTrip = nil },
+                onEdit: { selectedSavedTrip = nil }   // TODO: open the Trip in AI chat mode
             )
         }
     }
@@ -88,12 +93,13 @@ struct HomeTab: View {
     private var myTripsSection: some View {
         VStack(spacing: 8) {
             SectionHeader(title: "My Trips", hasButton: true, action: {})
-            if trips.isEmpty {
+            if savedTrips.isEmpty {
                 ContentEmptyState(icon: "suitcase", message: "Plan a trip and it'll show up here.")
             } else {
-                carousel(trips) { trip in
+                carousel(savedTrips) { saved in
+                    let trip = saved.displayTrip
                     Button {
-                        selectedTrip = trip
+                        selectedSavedTrip = saved
                     } label: {
                         PlaceCard(image: trip.coverImageName, title: trip.title, subtitle: trip.subtitle,
                                   width: 200, imageHeight: 150)

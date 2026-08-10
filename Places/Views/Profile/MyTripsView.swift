@@ -7,13 +7,14 @@
 
 import SwiftUI
 import SwiftData
+import SwiftfulRouting
 
 /// Instagram-style grid of the user's saved trips, with an empty state until
 /// they convert their first itinerary.
 /// Pushed from the profile settings via SwiftfulRouting.
 struct MyTripsView: View {
+    @Environment(\.router) private var router
     @Query(sort: \SavedTrip.createdAt, order: .reverse) private var savedTrips: [SavedTrip]
-    private var trips: [Trip] { savedTrips.map(\.displayTrip) }
 
     private let columns = [
         GridItem(.flexible(), spacing: 3),
@@ -23,13 +24,18 @@ struct MyTripsView: View {
 
     var body: some View {
         ScrollView(.vertical) {
-            if trips.isEmpty {
+            if savedTrips.isEmpty {
                 ContentEmptyState(icon: "suitcase", message: "Your saved trips will appear here.\nPlan one to get started.")
                     .padding(.top, 80)
             } else {
                 LazyVGrid(columns: columns, spacing: 3) {
-                    ForEach(trips) { trip in
-                        TripCell(trip: trip)
+                    ForEach(savedTrips) { saved in
+                        Button {
+                            router.showScreen(.push) { _ in TripView(trip: saved) }
+                        } label: {
+                            TripCell(trip: saved.displayTrip)
+                        }
+                        .buttonStyle(PressableButtonStyle())
                     }
                 }
                 .padding(.horizontal, 3)
