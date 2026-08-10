@@ -81,10 +81,6 @@ fileprivate struct CreateTripModifier: ViewModifier {
                                 let radius = circleSize / 2
                                 let angle = (CGFloat(index) / CGFloat(symbols.count)) * 360 + rotation
                                 let angleInRadians = (CGFloat.pi * angle) / 180
-                                
-                                // Foreshorten y by the 62° tilt so icons ride ON the
-                                // dashed ellipse. (Was multiplying by `rotation`, which
-                                // made them drift as the animation spun.)
                                 let rotation3D = cos((62 * CGFloat.pi) / 180)
                                 let x = cos(angleInRadians) * radius
                                 let y = sin(angleInRadians) * radius * rotation3D
@@ -99,8 +95,6 @@ fileprivate struct CreateTripModifier: ViewModifier {
                                     .shadow(color: tint.opacity(0.15), radius: 2, x: 1, y: 2)
                                     .shadow(color: tint.opacity(0.1), radius: 8, x: 4, y: 8)
                                     .scaleEffect(scaleProgress)
-                                    // Counter the cluster's -20° tilt so glyphs stay
-                                    // upright and readable instead of tumbling.
                                     .rotationEffect(.init(degrees: 20))
                                     .offset(x: x, y: y)
 

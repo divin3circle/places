@@ -9,3 +9,6 @@ build/
 
 # Private, un-tracked reference notes (strategy, business model, etc.)
 *.ignored.md
+
+# Claude Code local (machine-specific) settings
+.claude/settings.local.json
