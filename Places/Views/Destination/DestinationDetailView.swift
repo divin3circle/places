@@ -247,21 +247,39 @@ struct DestinationDetailView: View {
         }
     }
 
-    // Sticky bottom CTA — price + plan.
+    // Sticky bottom CTA — price + tickets + plan.
     private var planBar: some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 12) {
             if let fee = feeValue {
                 VStack(alignment: .leading, spacing: 1) {
                     Text("Entry").font(.system(size: 11, design: .rounded)).foregroundStyle(.secondary)
                     Text(fee).font(.system(size: 16, weight: .bold, design: .rounded))
                 }
             }
+            Button {
+                openURL(bookingLink)
+            } label: {
+                Image(systemName: "ticket.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .frame(width: 48, height: 48)
+                    .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 14, style: .continuous))
+            }
+            .buttonStyle(PressableButtonStyle())
+
             PrimaryButton(title: "Plan this trip") { showCreate = true }
         }
         .padding(.horizontal, 20)
         .padding(.top, 10)
         .padding(.bottom, 8)
         .background(.bar)
+    }
+
+    /// Booking/tickets link — the DB value, or a Google search fallback.
+    private var bookingLink: URL {
+        if let s = destination.bookingUrl, !s.isEmpty, let url = URL(string: s) { return url }
+        let q = destination.name.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? destination.name
+        return URL(string: "https://www.google.com/search?q=\(q)+tickets")!
     }
 
     // MARK: Building blocks
