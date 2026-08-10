@@ -126,7 +126,7 @@ struct ExploreTab: View {
 
     private func pushDestination(_ dto: DestinationDTO) {
         router.showScreen(.push) { _ in
-            ExploreDetailView(destination: dto)
+            DestinationDetailView(destination: dto)
         }
     }
 
