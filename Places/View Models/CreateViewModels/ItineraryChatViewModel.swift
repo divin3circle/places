@@ -55,6 +55,8 @@ final class ItineraryChatViewModel {
     private var itineraryVersions: [(itinerary: GeneratedItinerary, note: String?)] = []
 
     private let grounding: GroundingProviding
+    /// The grounding palette for this session (place names → coords/images/prices).
+    private var catalog: GroundingCatalog = .empty
     /// Restored engine session memory when resuming a saved trip (nil for new trips).
     private var resumeTranscript: Data?
     /// True when editing an existing trip — skip the initial generation.
@@ -103,6 +105,7 @@ final class ItineraryChatViewModel {
                 ItineraryLog.debug("grounding fetch failed: \(error)")
             }
             catalog.resolvedPlaces.forEach(registry.register)
+            self.catalog = catalog
 
             engine = ItineraryEngineFactory.make(
                 kind: kind,
@@ -136,6 +139,7 @@ final class ItineraryChatViewModel {
                     lastFullItinerary = itinerary
                     setKind(id: assistantId, .itinerary(ItineraryDisplay(full: itinerary)))
                 }
+                groundFinalPrices(id: assistantId)
                 recordVersion(note: "Original")
             } catch is CancellationError {
                 // dropped intentionally
@@ -161,6 +165,7 @@ final class ItineraryChatViewModel {
                     lastFullItinerary = itinerary
                     setKind(id: assistantId, .itinerary(ItineraryDisplay(full: itinerary)))
                 }
+                groundFinalPrices(id: assistantId)
                 recordVersion(note: trimmed)
             } catch is CancellationError {
                 // dropped intentionally
@@ -169,6 +174,15 @@ final class ItineraryChatViewModel {
             }
             isGenerating = false
         }
+    }
+
+    /// Once a stream finishes, replace model price estimates with grounded DB
+    /// prices where the place is known, and refresh the shown message.
+    private func groundFinalPrices(id: UUID) {
+        guard let final = lastFullItinerary else { return }
+        let grounded = final.withGroundedPrices { catalog.groundedPriceUSD(for: $0) }
+        lastFullItinerary = grounded
+        setKind(id: id, .itinerary(ItineraryDisplay(full: grounded)))
     }
 
     func stop() {
@@ -271,6 +285,12 @@ final class ItineraryChatViewModel {
         if !config.trimmedExpectation.isEmpty {
             lines.append("- Traveler's wish: \"\(config.trimmedExpectation)\"")
         }
+        lines.append(contentsOf: [
+            "",
+            "For EACH activity include: a realistic local start time (24-hour HH:mm), a rough durationMinutes, one short practical note, and a price estimate for the whole party (\(config.travelers) traveler\(config.travelers == 1 ? "" : "s")) in USD — real ballpark figures for East Africa (park fees, meals, activities); amount 0 when free. List activities in time order.",
+            "For EACH day add a one-line travelNote covering drive time or transfers.",
+            "Add 3–5 short, practical trip tips (weather, getting around, money, what to pack).",
+        ])
         return lines.joined(separator: "\n")
     }
 }

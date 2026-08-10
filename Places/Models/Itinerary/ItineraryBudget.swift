@@ -61,4 +61,21 @@ extension GeneratedItinerary {
         guard !totals.isEmpty else { return nil }
         return totals.reduce(0, +)
     }
+
+    /// Replace each activity's price with the grounded DB price (USD) when the
+    /// place is known; leaves the model's estimate otherwise. Pure.
+    func withGroundedPrices(_ priceUSD: (String) -> Double?) -> GeneratedItinerary {
+        var copy = self
+        copy.days = days.map { day in
+            var d = day
+            d.activities = day.activities.map { activity in
+                guard let usd = priceUSD(activity.placeName) else { return activity }
+                var a = activity
+                a.price = MoneyEstimate(amount: usd, currency: "USD")
+                return a
+            }
+            return d
+        }
+        return copy
+    }
 }

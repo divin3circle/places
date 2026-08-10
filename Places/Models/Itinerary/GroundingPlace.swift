@@ -16,6 +16,8 @@ nonisolated struct GroundingPlace: Identifiable {
     let imageURL: String
     let subtitle: String
     let bucket: PlaceCategory
+    /// Grounded price in USD (destination entry fee / experience price), if known.
+    var priceUSD: Double? = nil
 
     var id: String { name }
 
@@ -33,13 +35,16 @@ nonisolated extension GroundingPlace {
     init(destination d: DestinationDTO) {
         self.init(name: d.name, latitude: d.latitude, longitude: d.longitude,
                   imageURL: d.bannerUrl, subtitle: d.category,
-                  bucket: GroundingBucket.forDestination(category: d.category))
+                  bucket: GroundingBucket.forDestination(category: d.category),
+                  priceUSD: d.nonResidentFeeUsd)
     }
 
     init?(experience e: ExperienceDTO) {
         guard let lat = e.latitude, let lng = e.longitude else { return nil }
+        // Experience prices are stored per guest in KES → USD for grounding.
         self.init(name: e.title, latitude: lat, longitude: lng,
                   imageURL: e.images.first ?? "", subtitle: e.categoryLabel,
-                  bucket: GroundingBucket.forExperience(tag: e.categoryTag))
+                  bucket: GroundingBucket.forExperience(tag: e.categoryTag),
+                  priceUSD: Double(e.pricePerGuest) / Currency.usdToKes)
     }
 }

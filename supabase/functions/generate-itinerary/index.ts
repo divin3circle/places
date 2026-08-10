@@ -48,6 +48,48 @@ function json(body: unknown, status = 200) {
 }
 
 function itinerarySchema(placeNames: string[]) {
+  // OpenAI strict mode: every property must be listed in `required`; optional
+  // fields are expressed as nullable ("type": [T, "null"]) and decode to nil in
+  // the app's Swift Codable.
+  const money = {
+    type: ["object", "null"],
+    additionalProperties: false,
+    properties: {
+      amount: { type: "number" },
+      currency: { type: "string", enum: ["USD", "KES"] },
+    },
+    required: ["amount", "currency"],
+  };
+  const activity = {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      kind: { type: "string", enum: ACTIVITY_KINDS },
+      title: { type: "string" },
+      description: { type: "string" },
+      startTime: { type: ["string", "null"] },
+      durationMinutes: { type: ["integer", "null"] },
+      note: { type: ["string", "null"] },
+      price: money,
+      // Hard grounding: only real, mappable places.
+      placeName: { type: "string", enum: placeNames },
+    },
+    required: [
+      "kind", "title", "description", "startTime",
+      "durationMinutes", "note", "price", "placeName",
+    ],
+  };
+  const day = {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      title: { type: "string" },
+      subtitle: { type: "string" },
+      travelNote: { type: ["string", "null"] },
+      activities: { type: "array", items: activity },
+    },
+    required: ["title", "subtitle", "travelNote", "activities"],
+  };
   return {
     type: "object",
     additionalProperties: false,
@@ -55,35 +97,10 @@ function itinerarySchema(placeNames: string[]) {
       title: { type: "string" },
       summary: { type: "string" },
       rationale: { type: "string" },
-      days: {
-        type: "array",
-        items: {
-          type: "object",
-          additionalProperties: false,
-          properties: {
-            title: { type: "string" },
-            subtitle: { type: "string" },
-            activities: {
-              type: "array",
-              items: {
-                type: "object",
-                additionalProperties: false,
-                properties: {
-                  kind: { type: "string", enum: ACTIVITY_KINDS },
-                  title: { type: "string" },
-                  description: { type: "string" },
-                  // Hard grounding: only real, mappable places.
-                  placeName: { type: "string", enum: placeNames },
-                },
-                required: ["kind", "title", "description", "placeName"],
-              },
-            },
-          },
-          required: ["title", "subtitle", "activities"],
-        },
-      },
+      tips: { type: ["array", "null"], items: { type: "string" } },
+      days: { type: "array", items: day },
     },
-    required: ["title", "summary", "rationale", "days"],
+    required: ["title", "summary", "rationale", "tips", "days"],
   };
 }
 
@@ -104,6 +121,13 @@ function systemPrompt(c: ReqConfig): string {
   if (c.expectation.trim().length > 0) {
     lines.push(`- Traveler's wish: "${c.expectation}"`);
   }
+  lines.push(
+    "",
+    `For EACH activity set: startTime (24-hour "HH:mm"), durationMinutes, a short practical note, and price = an estimate for the whole party (${c.travelers} traveler(s)) in USD with real East-Africa ballpark figures (park fees, meals, activities); amount 0 when free. Order activities by time.`,
+    "For EACH day set travelNote to a one-line logistics note (drive time / transfers).",
+    "Set tips to 3–5 short, practical trip tips (weather, getting around, money, what to pack).",
+    "When a field genuinely does not apply, use null.",
+  );
   return lines.join("\n");
 }
 

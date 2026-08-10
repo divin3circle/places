@@ -19,5 +19,10 @@ nonisolated struct GroundingCatalog {
 
     var resolvedPlaces: [ResolvedPlace] { places.map(\.resolvedPlace) }
 
+    /// Grounded USD price for a place name (case-insensitive), if the DB has one.
+    func groundedPriceUSD(for name: String) -> Double? {
+        places.first { $0.name.caseInsensitiveCompare(name) == .orderedSame }?.priceUSD
+    }
+
     static let empty = GroundingCatalog(places: [])
 }
