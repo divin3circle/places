@@ -111,11 +111,9 @@ struct TripContentScrollView<ScrollContent: View, SheetContent: View, BottomBar:
                                     }
                                 })
                         )
-                        // Sit at the sheet top when collapsed; fade out as it lifts so
-                        // it never lands on the title.
-                        .padding(.top, 6)
-                        .opacity(1 - min(progress * 2.5, 1))
-                        .allowsHitTesting(progress < 0.3)
+                        // Ride the top of the sheet in both states (the overlay top
+                        // already sits below the notch when expanded, so no extra inset).
+                        .padding(.top, 8)
                 }
                 .contentShape(.rect)
                 .offset(y: size.height - sheetHeight)
