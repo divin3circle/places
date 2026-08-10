@@ -137,6 +137,14 @@ struct TripView: View {
                 }
             }
 
+            if let total = vm.tripTotal {
+                budgetSummary(total)
+            }
+
+            if !vm.tips.isEmpty {
+                tipsSection
+            }
+
             if !vm.days.isEmpty {
                 dayTabs
                 daySection(day: vm.days[min(selectedDay, vm.days.count - 1)])
@@ -177,12 +185,17 @@ struct TripView: View {
 
     private func daySection(day: ItineraryDay) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text(day.title)
                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                 if !day.subtitle.isEmpty {
                     Text(day.subtitle)
                         .font(.system(size: 13, design: .rounded))
+                        .foregroundStyle(.secondary)
+                }
+                if let note = day.travelNote, !note.isEmpty {
+                    Label(note, systemImage: "arrow.triangle.turn.up.right.diamond.fill")
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -195,6 +208,17 @@ struct TripView: View {
                         leg: isLast ? nil : vm.leg(from: activity, to: day.activities[i + 1])
                     )
                 }
+            }
+            if let total = vm.dayTotal(day) {
+                HStack {
+                    Text("Day total")
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text(total)
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                }
+                .padding(.top, 2)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -221,6 +245,11 @@ struct TripView: View {
             .frame(maxHeight: .infinity)
 
             VStack(alignment: .leading, spacing: 6) {
+                if let time = vm.timeLabel(activity) {
+                    Text(time)
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.accent)
+                }
                 Text(activity.title)
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                 if !activity.description.isEmpty {
@@ -235,16 +264,72 @@ struct TripView: View {
                         .clipShape(.rect(cornerRadius: 12, style: .continuous))
                         .padding(.top, 2)
                 }
+                if let note = activity.note, !note.isEmpty {
+                    Label(note, systemImage: "lightbulb.fill")
+                        .font(.system(size: 12, design: .rounded))
+                        .foregroundStyle(.secondary)
+                }
+                if let price = vm.priceLabel(activity) {
+                    priceChip(price).padding(.top, 2)
+                }
                 if let leg {
                     Label(leg.label, systemImage: leg.symbol)
                         .font(.system(size: 12, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
-                        .padding(.vertical, 2)
+                        .padding(.top, 2)
                 }
             }
             .padding(.bottom, isLast ? 2 : 20)
         }
         .animation(.easeOut(duration: 0.3), value: vm.resolvedPlaces.count)
+    }
+
+    private func budgetSummary(_ total: String) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Estimated budget")
+                    .font(.system(size: 12, design: .rounded))
+                    .foregroundStyle(.secondary)
+                Text(total)
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+            }
+            Spacer()
+            Image(systemName: "creditcard.fill")
+                .font(.title2)
+                .foregroundStyle(.accent)
+        }
+        .padding(16)
+        .background(.thinMaterial, in: .rect(cornerRadius: 18, style: .continuous))
+    }
+
+    private var tipsSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Good to know")
+                .font(.system(size: 17, weight: .semibold, design: .rounded))
+            ForEach(vm.tips, id: \.self) { tip in
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.accent)
+                        .padding(.top, 1)
+                    Text(tip)
+                        .font(.system(size: 14, design: .rounded))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(.thinMaterial, in: .rect(cornerRadius: 18, style: .continuous))
+    }
+
+    private func priceChip(_ price: String) -> some View {
+        let isFree = price == "Free"
+        return Text(price)
+            .font(.system(size: 12, weight: .bold, design: .rounded))
+            .padding(.horizontal, 9).padding(.vertical, 3)
+            .background((isFree ? Color.green : Color.accentColor).opacity(0.14), in: .capsule)
+            .foregroundStyle(isFree ? Color.green : Color.accentColor)
     }
 
     private var footer: some View {

@@ -91,6 +91,38 @@ final class TripViewModel {
         return parts.joined(separator: " · ")
     }
 
+    // MARK: Deep itinerary (times, prices, tips, budget)
+
+    /// Display currency (USD until TripConfig carries a preference).
+    var currency: Currency { .usd }
+
+    var tips: [String] { itinerary.tips ?? [] }
+
+    /// Formatted trip budget total, nil if nothing is priced.
+    var tripTotal: String? {
+        itinerary.estimatedTotal(in: currency).map { currency.format($0) }
+    }
+
+    func dayTotal(_ day: ItineraryDay) -> String? {
+        day.estimatedTotal(in: currency).map { currency.format($0) }
+    }
+
+    /// "09:30 · 2h 30m" from an activity's start time + duration (nil if neither).
+    func timeLabel(_ a: ItineraryActivity) -> String? {
+        var parts: [String] = []
+        if let t = a.startTime, !t.isEmpty { parts.append(t) }
+        if let m = a.durationMinutes, m > 0 { parts.append(Self.durationText(m)) }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    func priceLabel(_ a: ItineraryActivity) -> String? { a.displayPrice(in: currency) }
+
+    private static func durationText(_ minutes: Int) -> String {
+        if minutes < 60 { return "\(minutes)m" }
+        let h = minutes / 60, m = minutes % 60
+        return m > 0 ? "\(h)h \(m)m" : "\(h)h"
+    }
+
     // MARK: Place resolution (map + thumbnails)
 
     /// Fetch the grounding palette once and register it, so `registry.resolve` can
