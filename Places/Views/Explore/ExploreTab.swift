@@ -18,6 +18,11 @@ struct ExploreTab: View {
     @Environment(\.openURL) private var openURL
 
     @State private var searchText = ""
+    /// Selected "Things to do" category chip; nil = All.
+    @State private var selectedExperienceTag: String? = nil
+
+    /// City the "Things to do" feed is scoped to (no geolocation yet).
+    private let city: EACity = .nairobi
 
     // Transport hand-offs — external providers until in-app search lands (v1).
     private struct TransportLink: Identifiable {
@@ -51,8 +56,10 @@ struct ExploreTab: View {
                     VStack(alignment: .leading, spacing: 24) {
                         transportSection
                         mapSection
+                        collectionsSection
                         upcomingSection
                         recommendationsSection
+                        thingsToDoSection
                     }
                     .padding(.horizontal, 15)
                 }
@@ -60,7 +67,11 @@ struct ExploreTab: View {
             }
             .scrollIndicators(.hidden)
             .ignoresSafeArea(edges: .top)
-            .task { await content?.loadPopularDestinations() }
+            .task {
+                await content?.loadPopularDestinations()
+                await content?.loadCategories()
+                await content?.loadExperiences(cityId: city.rawValue)
+            }
         }
     }
 
@@ -123,6 +134,119 @@ struct ExploreTab: View {
             }
             .buttonStyle(PressableButtonStyle())
         }
+    }
+
+    private var collectionsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionTitle("Collections")
+            ScrollView(.horizontal) {
+                HStack(spacing: 16) {
+                    ForEach(DiscoveryCollection.all) { collection in
+                        Button {
+                            router.showScreen(.push) { _ in CollectionDetailView(collection: collection) }
+                        } label: {
+                            DiscoveryCollectionCard(collection: collection)
+                        }
+                        .buttonStyle(PressableButtonStyle())
+                    }
+                }
+                .padding(.vertical, 2)
+            }
+            .scrollIndicators(.hidden)
+        }
+    }
+
+    private var thingsToDoSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionTitle("Things to do")
+            experienceChips
+            thingsToDoContent
+        }
+    }
+
+    /// "All" + live category chips, filtering the loaded experiences client-side.
+    private var experienceChips: some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: 8) {
+                FilterPill(label: "All", isSelected: selectedExperienceTag == nil) {
+                    selectedExperienceTag = nil
+                }
+                if case .loaded(let cats) = content?.categories {
+                    ForEach(cats.map(ExperienceCategory.init(dto:))) { cat in
+                        FilterPill(label: cat.label, isSelected: selectedExperienceTag == cat.tag) {
+                            selectedExperienceTag = cat.tag
+                        }
+                    }
+                }
+            }
+            .padding(.vertical, 2)
+        }
+        .scrollIndicators(.hidden)
+    }
+
+    @ViewBuilder
+    private var thingsToDoContent: some View {
+        switch content?.experiencesByCity[city.rawValue] ?? .idle {
+        case .idle, .loading:
+            experienceSkeleton
+        case .loaded(let dtos):
+            let items = filteredExperiences(dtos)
+            if items.isEmpty {
+                ContentEmptyState(icon: "figure.walk",
+                                  message: "No experiences in this category yet.")
+            } else {
+                ScrollView(.horizontal) {
+                    LazyHStack(alignment: .top, spacing: 16) {
+                        ForEach(items) { dto in
+                            let experience = Experience(dto: dto)
+                            Button {
+                                router.showScreen(.push) { _ in
+                                    ExperienceDetailView(experience: experience)
+                                }
+                            } label: {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    ExperienceHero(experience: experience)
+                                        .frame(width: 240, height: 180)
+                                    ExperienceCaption(experience: experience, width: 240)
+                                }
+                            }
+                            .buttonStyle(PressableButtonStyle())
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+                .scrollIndicators(.hidden)
+                .animation(.snappy, value: selectedExperienceTag)
+            }
+        case .failed(let message):
+            retryRow(message)
+        }
+    }
+
+    private func filteredExperiences(_ dtos: [ExperienceDTO]) -> [ExperienceDTO] {
+        guard let tag = selectedExperienceTag else { return dtos }
+        return dtos.filter { $0.categoryTag == tag }
+    }
+
+    private var experienceSkeleton: some View {
+        ScrollView(.horizontal) {
+            LazyHStack(alignment: .top, spacing: 16) {
+                ForEach(0..<3, id: \.self) { _ in
+                    VStack(alignment: .leading, spacing: 8) {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(Color.gray.opacity(0.22))
+                            .frame(width: 240, height: 180)
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color.gray.opacity(0.22))
+                            .frame(width: 160, height: 12)
+                    }
+                }
+            }
+            .padding(.vertical, 4)
+        }
+        .scrollIndicators(.hidden)
+        .redacted(reason: .placeholder)
+        .allowsHitTesting(false)
     }
 
     private var upcomingSection: some View {
