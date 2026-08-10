@@ -111,8 +111,11 @@ struct TripContentScrollView<ScrollContent: View, SheetContent: View, BottomBar:
                                     }
                                 })
                         )
-                        // Ride the top of the sheet; drop below the notch when expanded.
-                        .padding(.top, 6 + safeArea.top * progress)
+                        // Sit at the sheet top when collapsed; fade out as it lifts so
+                        // it never lands on the title.
+                        .padding(.top, 6)
+                        .opacity(1 - min(progress * 2.5, 1))
+                        .allowsHitTesting(progress < 0.3)
                 }
                 .contentShape(.rect)
                 .offset(y: size.height - sheetHeight)
@@ -131,6 +134,8 @@ struct TripContentScrollView<ScrollContent: View, SheetContent: View, BottomBar:
                 }
             }
         }
+        // Let the sheet + hero bleed into the bottom safe area (no hard cutoff).
+        .ignoresSafeArea(.all, edges: .bottom)
         .toolbarVisibility(.hidden, for: .navigationBar)
         .toolbarVisibility(.hidden, for: .tabBar)
     }

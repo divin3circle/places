@@ -55,10 +55,36 @@ final class ItineraryChatViewModel {
     private var itineraryVersions: [(itinerary: GeneratedItinerary, note: String?)] = []
 
     private let grounding: GroundingProviding
+    /// Restored engine session memory when resuming a saved trip (nil for new trips).
+    private var resumeTranscript: Data?
+    /// True when editing an existing trip — skip the initial generation.
+    private var isResumed = false
 
     init(config: TripConfig, grounding: GroundingProviding = SupabaseGroundingRepository()) {
         self.config = config
         self.grounding = grounding
+    }
+
+    /// Resume an existing saved trip for editing: seed the chat with its current
+    /// itinerary + version history and restore the engine's session memory so the
+    /// next message refines this trip in place.
+    convenience init(resuming trip: SavedTrip, grounding: GroundingProviding = SupabaseGroundingRepository()) {
+        let config = trip.config ?? TripConfig(
+            travelers: 2, hasKids: false, expectation: "",
+            multipleCountries: false,
+            durationDays: trip.latestItinerary?.days.count ?? 3, durationLabel: "")
+        self.init(config: config, grounding: grounding)
+        savedTrip = trip
+        savedTripID = trip.id
+        resumeTranscript = trip.transcriptData
+        isResumed = true
+        itineraryVersions = trip.versions
+            .sorted { $0.order < $1.order }
+            .compactMap { version in version.itinerary.map { ($0, version.note) } }
+        lastFullItinerary = itineraryVersions.last?.itinerary
+        if let latest = lastFullItinerary {
+            items = [ItineraryChatItem(role: .assistant, kind: .itinerary(ItineraryDisplay(full: latest)))]
+        }
     }
 
     /// Called once, after the model preference is known. Generation stays in
@@ -83,10 +109,12 @@ final class ItineraryChatViewModel {
                 config: config,
                 systemPrompt: Self.systemPrompt(for: config),
                 registry: registry,
-                catalog: catalog
+                catalog: catalog,
+                resumeTranscript: resumeTranscript
             )
             engine?.prewarm()
-            generateInitial()
+            // Resumed trips already have an itinerary — wait for the user's edit.
+            if !isResumed { generateInitial() }
         }
     }
 

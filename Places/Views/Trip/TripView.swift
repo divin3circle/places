@@ -20,6 +20,7 @@ struct TripView: View {
     @State private var vm: TripViewModel
     @State private var appeared = false
     @State private var showDeleteConfirm = false
+    @State private var showEditor = false
 
     init(trip: SavedTrip) {
         _vm = State(initialValue: TripViewModel(trip: trip))
@@ -46,6 +47,18 @@ struct TripView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This removes \u{201C}\(vm.title)\u{201D} from My Trips. This can't be undone.")
+        }
+        .fullScreenCover(isPresented: $showEditor, onDismiss: {
+            // The trip may have been edited in the chat — rebuild from its latest version.
+            let trip = vm.trip
+            vm = TripViewModel(trip: trip)
+            appeared = false
+            Task {
+                await vm.resolvePlaces()
+                withAnimation(.snappy(duration: 0.45)) { appeared = true }
+            }
+        }) {
+            GenerateItineraryView(trip: vm.trip)
         }
     }
 
@@ -87,6 +100,15 @@ struct TripView: View {
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
             }
+
+            Button {
+                showEditor = true
+            } label: {
+                Label("Edit with AI", systemImage: "sparkles")
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.appPrimary)
 
             if !vm.summary.isEmpty {
                 Text(vm.summary)
