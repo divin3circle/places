@@ -21,6 +21,7 @@ struct TripView: View {
     @State private var appeared = false
     @State private var showDeleteConfirm = false
     @State private var showEditor = false
+    @State private var selectedDay = 0
 
     init(trip: SavedTrip) {
         _vm = State(initialValue: TripViewModel(trip: trip))
@@ -53,6 +54,7 @@ struct TripView: View {
             let trip = vm.trip
             vm = TripViewModel(trip: trip)
             appeared = false
+            selectedDay = 0
             Task {
                 await vm.resolvePlaces()
                 withAnimation(.snappy(duration: 0.45)) { appeared = true }
@@ -69,8 +71,16 @@ struct TripView: View {
         ZStack(alignment: .bottom) {
             if !vm.resolvedPlaces.isEmpty {
                 Map(interactionModes: []) {
-                    ForEach(vm.resolvedPlaces) { place in
-                        Marker(place.name, coordinate: place.coordinate)
+                    ForEach(Array(vm.resolvedPlaces.enumerated()), id: \.offset) { i, place in
+                        Annotation(place.name, coordinate: place.coordinate) {
+                            ZStack {
+                                Circle().fill(.accent).frame(width: 26, height: 26)
+                                Text("\(i + 1)")
+                                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                                    .foregroundStyle(.white)
+                            }
+                            .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
+                        }
                     }
                 }
             } else {
@@ -127,12 +137,12 @@ struct TripView: View {
                 }
             }
 
-            ForEach(Array(vm.days.enumerated()), id: \.offset) { index, day in
-                daySection(index: index, day: day)
-                    // Subtle staggered reveal on first load.
+            if !vm.days.isEmpty {
+                dayTabs
+                daySection(day: vm.days[min(selectedDay, vm.days.count - 1)])
                     .opacity(appeared ? 1 : 0)
-                    .offset(y: appeared ? 0 : 10)
-                    .animation(.snappy(duration: 0.4).delay(Double(index) * 0.05), value: appeared)
+                    .animation(.snappy(duration: 0.4), value: appeared)
+                    .animation(.snappy, value: selectedDay)
             }
 
             footer
@@ -142,37 +152,75 @@ struct TripView: View {
         .padding(.bottom, 40)
     }
 
-    private func daySection(index: Int, day: ItineraryDay) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Day \(index + 1)")
-                    .font(.system(size: 12, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.secondary)
+    // Horizontal day selector — one day's timeline shows at a time.
+    private var dayTabs: some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: 8) {
+                ForEach(vm.days.indices, id: \.self) { i in
+                    let isSelected = min(selectedDay, vm.days.count - 1) == i
+                    Button {
+                        withAnimation(.snappy) { selectedDay = i }
+                    } label: {
+                        Text("Day \(i + 1)")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            .padding(.horizontal, 14).padding(.vertical, 8)
+                            .background(isSelected ? Color.primary : Color(.secondarySystemBackground), in: .capsule)
+                            .foregroundStyle(isSelected ? Color(.systemBackground) : .primary)
+                    }
+                    .buttonStyle(PressableButtonStyle())
+                }
+            }
+            .padding(.horizontal, 2)
+        }
+        .scrollIndicators(.hidden)
+    }
+
+    private func daySection(day: ItineraryDay) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(day.title)
-                    .font(.system(size: 17, weight: .semibold, design: .rounded))
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                if !day.subtitle.isEmpty {
+                    Text(day.subtitle)
+                        .font(.system(size: 13, design: .rounded))
+                        .foregroundStyle(.secondary)
+                }
             }
-            if !day.subtitle.isEmpty {
-                Text(day.subtitle)
-                    .font(.system(size: 13, design: .rounded))
-                    .foregroundStyle(.secondary)
-            }
-            ForEach(Array(day.activities.enumerated()), id: \.offset) { _, activity in
-                activityRow(activity)
+            VStack(spacing: 0) {
+                ForEach(Array(day.activities.enumerated()), id: \.offset) { i, activity in
+                    let isLast = i == day.activities.count - 1
+                    timelineRow(
+                        activity,
+                        isLast: isLast,
+                        leg: isLast ? nil : vm.leg(from: activity, to: day.activities[i + 1])
+                    )
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(.thinMaterial, in: .rect(cornerRadius: 18, style: .continuous))
     }
 
-    private func activityRow(_ activity: ItineraryActivity) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: activity.kind.symbolName)
-                .font(.system(size: 15))
-                .foregroundStyle(.secondary)
-                .frame(width: 24)
+    // A single timeline stop: kind-icon node + connector, then the activity.
+    private func timelineRow(_ activity: ItineraryActivity, isLast: Bool, leg: TravelLeg?) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            VStack(spacing: 0) {
+                ZStack {
+                    Circle().fill(Color.accentColor.opacity(0.15)).frame(width: 36, height: 36)
+                    Image(systemName: activity.kind.symbolName)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.accent)
+                }
+                if !isLast {
+                    Rectangle()
+                        .fill(Color.secondary.opacity(0.25))
+                        .frame(width: 2)
+                        .frame(maxHeight: .infinity)
+                }
+            }
+            .frame(width: 36)
+            .frame(maxHeight: .infinity)
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(activity.title)
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                 if !activity.description.isEmpty {
@@ -186,9 +234,15 @@ struct TripView: View {
                         .frame(maxWidth: .infinity)
                         .clipShape(.rect(cornerRadius: 12, style: .continuous))
                         .padding(.top, 2)
-                        .transition(.opacity)
+                }
+                if let leg {
+                    Label(leg.label, systemImage: leg.symbol)
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundStyle(.secondary)
+                        .padding(.vertical, 2)
                 }
             }
+            .padding(.bottom, isLast ? 2 : 20)
         }
         .animation(.easeOut(duration: 0.3), value: vm.resolvedPlaces.count)
     }

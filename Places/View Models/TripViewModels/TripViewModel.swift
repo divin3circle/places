@@ -9,6 +9,24 @@
 //
 
 import Foundation
+import CoreLocation
+
+/// A rough, offline travel estimate between two grounded places (straight-line
+/// distance → a walk/drive guess). Clearly approximate ("~").
+nonisolated struct TravelLeg {
+    let kilometers: Double
+    let minutes: Int
+    let isWalk: Bool
+
+    var label: String {
+        let dist = kilometers < 1
+            ? "\(Int((kilometers * 1000).rounded())) m"
+            : String(format: "%.0f km", kilometers)
+        let time = minutes < 60 ? "~\(minutes) min" : "~\(minutes / 60)h \(minutes % 60)m"
+        return "\(isWalk ? "Walk" : "Drive") · \(dist) · \(time)"
+    }
+    var symbol: String { isWalk ? "figure.walk" : "car.fill" }
+}
 
 @Observable @MainActor
 final class TripViewModel {
@@ -25,6 +43,22 @@ final class TripViewModel {
         self.itinerary = trip.latestItinerary
             ?? GeneratedItinerary(title: trip.title, summary: "", rationale: "", days: [])
         self.grounding = grounding
+    }
+
+    /// Straight-line travel estimate between two activities' resolved places.
+    /// nil when either place is unknown or they're essentially the same spot.
+    func leg(from: ItineraryActivity, to: ItineraryActivity) -> TravelLeg? {
+        guard let a = registry.resolve(from.placeName),
+              let b = registry.resolve(to.placeName),
+              a.id != b.id else { return nil }
+        let da = CLLocation(latitude: a.coordinate.latitude, longitude: a.coordinate.longitude)
+        let db = CLLocation(latitude: b.coordinate.latitude, longitude: b.coordinate.longitude)
+        let km = da.distance(from: db) / 1000
+        guard km > 0.08 else { return nil }
+        let isWalk = km <= 1.2
+        // ~4.8 km/h walking, ~38 km/h effective driving (urban + regional blend).
+        let minutes = max(1, Int(((km / (isWalk ? 4.8 : 38)) * 60).rounded()))
+        return TravelLeg(kilometers: km, minutes: minutes, isWalk: isWalk)
     }
 
     // MARK: Display
