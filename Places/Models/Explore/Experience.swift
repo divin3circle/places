@@ -33,12 +33,21 @@ nonisolated struct Experience: Identifiable, Hashable {
     var language: String
     var description: String
     var freeCancellation: Bool = true
+    /// Booking/reserve link from the DB (nil → app derives a search fallback).
+    var bookingURL: String? = nil
 
     /// e.g. "KSh 14,230"
     var priceLabel: String {
         "\(currency) \(pricePerGuest.formatted(.number.grouping(.automatic)))"
     }
     var coverImage: String { imageNames.first ?? "sample" }
+
+    /// The booking/reserve link — the DB value, or a Google search fallback.
+    var bookingLink: URL {
+        if let s = bookingURL, !s.isEmpty, let url = URL(string: s) { return url }
+        let q = title.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? title
+        return URL(string: "https://www.google.com/search?q=\(q)+book")!
+    }
 }
 
 #if DEBUG

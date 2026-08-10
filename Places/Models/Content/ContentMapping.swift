@@ -45,7 +45,8 @@ extension Experience {
             locationArea: dto.locationArea,
             durationLabel: dto.durationLabel,
             language: dto.language,
-            description: dto.description
+            description: dto.description,
+            bookingURL: dto.bookingUrl
         )
     }
 }

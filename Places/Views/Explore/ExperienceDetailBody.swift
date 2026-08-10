@@ -14,6 +14,8 @@ struct ExperienceDetailBody: View {
     /// The morph shows the title + rating on the hero image, so it hides them here.
     var showsTitle: Bool = true
 
+    @Environment(\.openURL) private var openURL
+
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
             // The morph shows the title + rating on the hero image and the
@@ -124,7 +126,8 @@ struct ExperienceDetailBody: View {
             }
             Spacer(minLength: 12)
             Button("Show dates") {
-                // TODO: booking flow (dates → checkout).
+                // For now, booking hands off to the provider's site (or a search).
+                openURL(experience.bookingLink)
             }
             .buttonStyle(.appAccent)
             .frame(width: 160)
