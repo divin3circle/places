@@ -25,4 +25,11 @@ enum SupabaseConfig {
     static var itineraryFunctionURL: URL {
         functionsBaseURL.appendingPathComponent(itineraryFunction)
     }
+
+    /// Trip-context tool (weather, getting around, money) — static for now.
+    static let tripIntelFunction = "trip-intel"
+
+    static var tripIntelFunctionURL: URL {
+        functionsBaseURL.appendingPathComponent(tripIntelFunction)
+    }
 }

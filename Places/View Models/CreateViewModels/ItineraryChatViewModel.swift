@@ -110,10 +110,29 @@ final class ItineraryChatViewModel {
             catalog.resolvedPlaces.forEach(registry.register)
             self.catalog = catalog
 
+            // When "use saved places" is on, fold the bookmarks into the trip's
+            // wish so BOTH engines prioritise them (the on-device prompt and the
+            // cloud edge function both read config.expectation).
+            var effectiveConfig = config
+            if config.useSavedPlaces, !preferredPlaceNames.isEmpty {
+                let pref = "Prioritise these saved places where they fit: \(preferredPlaceNames.joined(separator: ", "))."
+                effectiveConfig.expectation = config.trimmedExpectation.isEmpty
+                    ? pref : "\(config.trimmedExpectation) \(pref)"
+            }
+
+            // Trip-context tool: fold static local context (weather / getting around /
+            // money) into the wish so both engines use it. Best-effort — never blocks.
+            let region = config.multipleCountries ? "East Africa" : "Kenya"
+            let month = config.startDate.map { $0.formatted(.dateTime.month(.wide)) }
+            if let intel = try? await TripIntelClient.fetch(destination: region, month: month) {
+                effectiveConfig.expectation = effectiveConfig.trimmedExpectation.isEmpty
+                    ? intel.promptContext : "\(effectiveConfig.expectation) \(intel.promptContext)"
+            }
+
             engine = ItineraryEngineFactory.make(
                 kind: kind,
-                config: config,
-                systemPrompt: Self.systemPrompt(for: config),
+                config: effectiveConfig,
+                systemPrompt: Self.systemPrompt(for: effectiveConfig),
                 registry: registry,
                 catalog: catalog,
                 resumeTranscript: resumeTranscript
@@ -126,15 +145,12 @@ final class ItineraryChatViewModel {
 
     private func generateInitial() {
         guard let engine else { return }
-        var request = """
+        let request = """
         Create a \(config.durationDays)-day itinerary now, based on the trip details in your instructions. \
         Use findPlaces to look up places by kind (e.g. wildlife, city, beach), then build the itinerary \
         using only the exact place names it returns. \
         Produce exactly \(config.durationDays) day(s).
         """
-        if config.useSavedPlaces, !preferredPlaceNames.isEmpty {
-            request += "\nThe traveler saved these places — prioritise them where they fit: \(preferredPlaceNames.joined(separator: ", "))."
-        }
         let assistantId = UUID()
         items.append(ItineraryChatItem(id: assistantId, role: .assistant, kind: .itinerary(nil)))
         isGenerating = true
