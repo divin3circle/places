@@ -14,8 +14,24 @@ import SwiftData
 struct ExploreTab: View {
     @Environment(\.router) private var router
     @Environment(ContentStore.self) private var content: ContentStore?
+    @Environment(\.openURL) private var openURL
 
     @State private var searchText = ""
+
+    // Transport hand-offs — external providers until in-app search lands (v1).
+    private struct TransportLink: Identifiable {
+        let id = UUID()
+        let title: String
+        let icon: String
+        let url: URL
+    }
+    private let transportLinks: [TransportLink] = [
+        .init(title: "Flights", icon: "airplane", url: URL(string: "https://www.kenya-airways.com")!),
+        .init(title: "Trains", icon: "train.side.front.car", url: URL(string: "https://metickets.krc.co.ke")!),
+        .init(title: "Buses", icon: "bus.fill", url: URL(string: "https://www.buupass.com")!),
+        .init(title: "Car hire", icon: "car.fill", url: URL(string: "https://www.google.com/search?q=car+hire+kenya")!),
+        .init(title: "Transfers", icon: "airplane.arrival", url: URL(string: "https://www.google.com/search?q=nairobi+airport+transfer")!),
+    ]
 
     @Query(sort: \SavedTrip.createdAt, order: .reverse) private var savedTrips: [SavedTrip]
     /// Most recently planned trip, surfaced as the Explore hero (nil until one exists).
@@ -32,6 +48,7 @@ struct ExploreTab: View {
                     ExploreHero(searchText: $searchText, topInset: topInset)
 
                     VStack(alignment: .leading, spacing: 24) {
+                        transportSection
                         upcomingSection
                         recommendationsSection
                     }
@@ -46,6 +63,36 @@ struct ExploreTab: View {
     }
 
     // MARK: Sections
+
+    private var transportSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionTitle("Get around")
+            ScrollView(.horizontal) {
+                HStack(spacing: 14) {
+                    ForEach(transportLinks) { link in
+                        Button { openURL(link.url) } label: { transportPill(link) }
+                            .buttonStyle(PressableButtonStyle())
+                    }
+                }
+                .padding(.vertical, 2)
+            }
+            .scrollIndicators(.hidden)
+        }
+    }
+
+    private func transportPill(_ link: TransportLink) -> some View {
+        VStack(spacing: 8) {
+            Image(systemName: link.icon)
+                .font(.system(size: 20))
+                .foregroundStyle(.accent)
+                .frame(width: 56, height: 56)
+                .background(Color(.secondarySystemBackground), in: .circle)
+            Text(link.title)
+                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .foregroundStyle(.primary)
+        }
+        .frame(width: 72)
+    }
 
     private var upcomingSection: some View {
         VStack(alignment: .leading, spacing: 12) {
