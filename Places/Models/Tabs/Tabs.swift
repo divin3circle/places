@@ -10,7 +10,7 @@ import Foundation
 enum AppTabs: String, CaseIterable {
     case home = "Feed"
     case explore = "Explore"
-    case lounges = "Lounges"
+    case lounges = "Lounges"   // hidden from the tab bar for v1 (no Chats backend yet)
     case profile = "Profile"
     
     var tabImage: String {
