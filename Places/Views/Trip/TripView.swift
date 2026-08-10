@@ -169,7 +169,7 @@ struct TripView: View {
                     Button {
                         withAnimation(.snappy) { selectedDay = i }
                     } label: {
-                        Text("Day \(i + 1)")
+                        Text(vm.dayTabLabel(i))
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .padding(.horizontal, 14).padding(.vertical, 8)
                             .background(isSelected ? Color.primary : Color(.secondarySystemBackground), in: .capsule)

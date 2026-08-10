@@ -61,6 +61,9 @@ final class ItineraryChatViewModel {
     private var resumeTranscript: Data?
     /// True when editing an existing trip — skip the initial generation.
     private var isResumed = false
+    /// Bookmarked place names to bias generation toward (when config.useSavedPlaces).
+    /// Set by the view before `start()`.
+    var preferredPlaceNames: [String] = []
 
     init(config: TripConfig, grounding: GroundingProviding = SupabaseGroundingRepository()) {
         self.config = config
@@ -123,12 +126,15 @@ final class ItineraryChatViewModel {
 
     private func generateInitial() {
         guard let engine else { return }
-        let request = """
+        var request = """
         Create a \(config.durationDays)-day itinerary now, based on the trip details in your instructions. \
         Use findPlaces to look up places by kind (e.g. wildlife, city, beach), then build the itinerary \
         using only the exact place names it returns. \
         Produce exactly \(config.durationDays) day(s).
         """
+        if config.useSavedPlaces, !preferredPlaceNames.isEmpty {
+            request += "\nThe traveler saved these places — prioritise them where they fit: \(preferredPlaceNames.joined(separator: ", "))."
+        }
         let assistantId = UUID()
         items.append(ItineraryChatItem(id: assistantId, role: .assistant, kind: .itinerary(nil)))
         isGenerating = true

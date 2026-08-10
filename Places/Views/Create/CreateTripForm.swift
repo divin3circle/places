@@ -8,6 +8,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct CreateTripForm: View {
     @Bindable var vm: TripConfigViewModel
@@ -15,6 +16,7 @@ struct CreateTripForm: View {
     var onFinish: () -> Void
 
     @AppStorage(AIPreferenceKey.model) private var aiModelRaw = ""
+    @Query private var savedPlaces: [SavedPlace]
 
     var body: some View {
         VStack(spacing: 20) {
@@ -58,7 +60,8 @@ struct CreateTripForm: View {
         case 1: kidsStep
         case 2: expectationStep
         case 3: countriesStep
-        default: durationStep
+        case 4: durationStep
+        default: preferencesStep
         }
     }
 
@@ -111,6 +114,42 @@ struct CreateTripForm: View {
                     stepper(value: vm.customDays, unit: vm.customDays == 1 ? "day" : "days",
                             onMinus: vm.decrementDays, onPlus: vm.incrementDays)
                         .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+            }
+        }
+    }
+
+    private var preferencesStep: some View {
+        stepScaffold(icon: "slider.horizontal.3", title: "A few preferences", subtitle: "Fine-tune the plan.") {
+            VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Start date")
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    DatePicker("", selection: $vm.startDate, in: Date.now..., displayedComponents: .date)
+                        .labelsHidden()
+                        .datePickerStyle(.compact)
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Budget currency")
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    HStack(spacing: 10) {
+                        choicePill("USD $", selected: vm.currency == .usd) { withAnimation(.snappy) { vm.currency = .usd } }
+                        choicePill("KSh", selected: vm.currency == .kes) { withAnimation(.snappy) { vm.currency = .kes } }
+                    }
+                }
+
+                if !savedPlaces.isEmpty {
+                    Toggle(isOn: $vm.useSavedPlaces) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Base on your saved places")
+                                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                            Text("Prefer the \(savedPlaces.count) place\(savedPlaces.count == 1 ? "" : "s") you've bookmarked.")
+                                .font(.system(size: 13, design: .rounded))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .tint(.accent)
                 }
             }
         }

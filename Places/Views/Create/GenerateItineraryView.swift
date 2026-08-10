@@ -17,6 +17,7 @@ import class RiveRuntime.RiveViewModel
 struct GenerateItineraryView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Query private var savedPlaces: [SavedPlace]
     let config: TripConfig
 
     @State private var vm: ItineraryChatViewModel
@@ -141,6 +142,9 @@ struct GenerateItineraryView: View {
     }
 
     private func startGeneration() {
+        if config.useSavedPlaces {
+            vm.preferredPlaceNames = savedPlaces.map(\.name)
+        }
         let kind = AIModelKind(rawValue: aiModelRaw) ?? .onDevice
         vm.start(kind: kind)
     }

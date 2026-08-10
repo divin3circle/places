@@ -93,8 +93,17 @@ final class TripViewModel {
 
     // MARK: Deep itinerary (times, prices, tips, budget)
 
-    /// Display currency (USD until TripConfig carries a preference).
-    var currency: Currency { .usd }
+    /// Display currency from the trip's config (USD default).
+    var currency: Currency { trip.config?.currency ?? .usd }
+
+    /// Day-tab label: a real date when the trip has a start date, else "Day N".
+    func dayTabLabel(_ index: Int) -> String {
+        guard let start = trip.config?.startDate,
+              let date = Calendar.current.date(byAdding: .day, value: index, to: start) else {
+            return "Day \(index + 1)"
+        }
+        return date.formatted(.dateTime.weekday(.abbreviated).day())
+    }
 
     var tips: [String] { itinerary.tips ?? [] }
 

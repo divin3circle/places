@@ -19,6 +19,9 @@ nonisolated struct TripConfig: Identifiable, Hashable, Codable {
     var multipleCountries: Bool
     var durationDays: Int
     var durationLabel: String
+    var startDate: Date? = nil
+    var currency: Currency = .usd
+    var useSavedPlaces: Bool = false
 
     var trimmedExpectation: String {
         expectation.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -27,6 +30,23 @@ nonisolated struct TripConfig: Identifiable, Hashable, Codable {
     // `id` is a fresh local identifier, not persisted config data.
     private enum CodingKeys: String, CodingKey {
         case travelers, hasKids, expectation, multipleCountries, durationDays, durationLabel
+        case startDate, currency, useSavedPlaces
+    }
+}
+
+nonisolated extension TripConfig {
+    // Tolerant decode so trips saved before startDate/currency/useSavedPlaces still load.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        travelers = try c.decode(Int.self, forKey: .travelers)
+        hasKids = try c.decode(Bool.self, forKey: .hasKids)
+        expectation = try c.decode(String.self, forKey: .expectation)
+        multipleCountries = try c.decode(Bool.self, forKey: .multipleCountries)
+        durationDays = try c.decode(Int.self, forKey: .durationDays)
+        durationLabel = try c.decode(String.self, forKey: .durationLabel)
+        startDate = try c.decodeIfPresent(Date.self, forKey: .startDate)
+        currency = try c.decodeIfPresent(Currency.self, forKey: .currency) ?? .usd
+        useSavedPlaces = try c.decodeIfPresent(Bool.self, forKey: .useSavedPlaces) ?? false
     }
 }
 
@@ -53,7 +73,7 @@ enum DurationPreset: String, CaseIterable, Identifiable {
 
 @Observable
 final class TripConfigViewModel {
-    let totalSteps = 5
+    let totalSteps = 6
 
     var step = 0
 
@@ -64,6 +84,9 @@ final class TripConfigViewModel {
     var multipleCountries = false
     var durationPreset: DurationPreset = .week
     var customDays = 5
+    var startDate: Date = Calendar.current.date(byAdding: .day, value: 14, to: .now) ?? .now
+    var currency: Currency = .usd
+    var useSavedPlaces = false
 
     var progress: Double { Double(step + 1) / Double(totalSteps) }
     var isFirstStep: Bool { step == 0 }
@@ -93,7 +116,10 @@ final class TripConfigViewModel {
             expectation: expectation,
             multipleCountries: multipleCountries,
             durationDays: durationDays,
-            durationLabel: durationPreset == .custom ? "\(customDays) day\(customDays == 1 ? "" : "s")" : durationPreset.rawValue
+            durationLabel: durationPreset == .custom ? "\(customDays) day\(customDays == 1 ? "" : "s")" : durationPreset.rawValue,
+            startDate: startDate,
+            currency: currency,
+            useSavedPlaces: useSavedPlaces
         )
     }
 }
