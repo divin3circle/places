@@ -12,14 +12,20 @@
 import SwiftUI
 import MapKit
 import SwiftfulRouting
+import SwiftData
 
 struct DestinationDetailView: View {
     let destination: DestinationDTO
 
     @Environment(\.router) private var router
     @Environment(\.openURL) private var openURL
+    @Environment(\.modelContext) private var context
 
-    @State private var isSaved = false
+    @Query private var savedPlaces: [SavedPlace]
+    private var isSaved: Bool {
+        savedPlaces.contains { $0.kind == "destination" && $0.refId == destination.id }
+    }
+
     @State private var appeared = false
     @State private var showCreate = false
     @State private var pendingConfig: TripConfig?
@@ -124,7 +130,7 @@ struct DestinationDetailView: View {
                 circleButton("chevron.left") { router.dismissScreen() }
                 Spacer()
                 circleButton(isSaved ? "bookmark.fill" : "bookmark") {
-                    withAnimation(.snappy) { isSaved.toggle() }
+                    toggleSaved()
                 }
                 .foregroundStyle(isSaved ? .accent : .primary)
                 ShareLink(item: "\(destination.name) — \(destination.description)") {
@@ -360,6 +366,15 @@ struct DestinationDetailView: View {
 
     private func countryName(_ code: String) -> String {
         Locale.current.localizedString(forRegionCode: code) ?? code
+    }
+
+    private func toggleSaved() {
+        if let existing = savedPlaces.first(where: { $0.kind == "destination" && $0.refId == destination.id }) {
+            context.delete(existing)
+        } else {
+            context.insert(SavedPlace(destination: destination))
+        }
+        try? context.save()
     }
 
     private func openInMaps() {

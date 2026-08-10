@@ -9,6 +9,7 @@
 
 import SwiftUI
 import SwiftfulRouting
+import SwiftData
 
 struct ExperienceCategoryListView: View {
     let category: ExperienceCategory
@@ -16,10 +17,11 @@ struct ExperienceCategoryListView: View {
 
     @Environment(\.router) private var router
     @Environment(ContentStore.self) private var content: ContentStore?
+    @Environment(\.modelContext) private var context
+    @Query private var savedPlaces: [SavedPlace]
 
     @State private var selectedTag: String
     @State private var searchText = ""
-    @State private var savedIds: Set<UUID> = []
 
     init(category: ExperienceCategory, city: EACity = .nairobi) {
         self.category = category
@@ -116,8 +118,8 @@ struct ExperienceCategoryListView: View {
                         } label: {
                             ExperienceRow(
                                 experience: experience,
-                                isSaved: savedIds.contains(experience.id),
-                                onToggleSave: { toggleSave(experience.id) }
+                                isSaved: isSaved(dto),
+                                onToggleSave: { toggleSave(dto) }
                             )
                         }
                         .buttonStyle(PressableButtonStyle())
@@ -142,10 +144,17 @@ struct ExperienceCategoryListView: View {
         }
     }
 
-    private func toggleSave(_ id: UUID) {
-        withAnimation(.snappy) {
-            if savedIds.contains(id) { savedIds.remove(id) } else { savedIds.insert(id) }
+    private func isSaved(_ dto: ExperienceDTO) -> Bool {
+        savedPlaces.contains { $0.kind == "experience" && $0.refId == dto.id.uuidString }
+    }
+
+    private func toggleSave(_ dto: ExperienceDTO) {
+        if let existing = savedPlaces.first(where: { $0.kind == "experience" && $0.refId == dto.id.uuidString }) {
+            context.delete(existing)
+        } else {
+            context.insert(SavedPlace(experience: dto))
         }
+        try? context.save()
     }
 }
 

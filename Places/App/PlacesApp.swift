@@ -34,7 +34,7 @@ struct PlacesApp: App {
             .environment(content)
             .task { await session.bootstrap() }
         }
-        // On-device store for saved trips (no CloudKit).
-        .modelContainer(for: [SavedTrip.self, SavedItineraryVersion.self])
+        // On-device store for saved trips + bookmarks (no CloudKit).
+        .modelContainer(for: [SavedTrip.self, SavedItineraryVersion.self, SavedPlace.self])
     }
 }
