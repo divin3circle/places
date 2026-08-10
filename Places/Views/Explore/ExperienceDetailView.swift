@@ -27,7 +27,7 @@ struct ExperienceDetailView: View {
     private var gallery: some View {
         TabView {
             ForEach(experience.imageNames, id: \.self) { name in
-                DownsampledAssetImage(name: name, width: 400, height: 340)
+                RemoteImage(name, width: 400, height: 340)
                     .frame(maxWidth: .infinity)
                     .frame(height: 340)
                     .clipped()

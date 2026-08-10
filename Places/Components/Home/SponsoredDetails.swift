@@ -24,9 +24,7 @@ struct SponsoredDetails: View {
                 ZStack {
                     card.accentColor
 
-                    DownsampledAssetImage(
-                        name: card.image, width: 440, height: 950, placeholderColor: .clear
-                    )
+                    RemoteImage(card.image, width: 440, height: 950)
 
                     // Legibility scrims: light at the top for the badge/close, heavy
                     // at the bottom for the glass card.

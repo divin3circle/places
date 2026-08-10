@@ -15,7 +15,7 @@ struct ExperienceRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 14) {
-            DownsampledAssetImage(name: experience.coverImage, width: 118, height: 118)
+            RemoteImage(experience.coverImage, width: 118, height: 118)
                 .frame(width: 118, height: 118)
                 .clipShape(.rect(cornerRadius: 16, style: .continuous))
                 .overlay(alignment: .topLeading) {
