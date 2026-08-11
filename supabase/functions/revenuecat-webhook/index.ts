@@ -49,7 +49,7 @@ Deno.serve(async (req: Request) => {
     }
   } else if (REVOKING.includes(type)) {
     // Keep purchased tokens; drop pro access. (Lifetime does not expire.)
-    if (productId !== "pro_lifetime") {
+    if (productId !== "piea_pro_lifetime") {
       await admin.from("profiles").update({ plan: "free", plan_product: null })
         .eq("id", userId);
     }

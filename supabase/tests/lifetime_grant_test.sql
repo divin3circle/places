@@ -4,7 +4,7 @@ select plan(2);
 insert into auth.users (id, email) values ('00000000-0000-0000-0000-000000000003', 'l@l.co')
   on conflict do nothing;
 insert into public.profiles (id, name, email, plan, plan_product)
-  values ('00000000-0000-0000-0000-000000000003', 'Lee', 'l@l.co', 'pro', 'pro_lifetime');
+  values ('00000000-0000-0000-0000-000000000003', 'Lee', 'l@l.co', 'pro', 'piea_pro_lifetime');
 
 -- First run grants 1000; second run in the same month grants nothing more.
 select public.grant_lifetime_tokens();
