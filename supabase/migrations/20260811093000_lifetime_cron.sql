@@ -12,8 +12,11 @@ begin
   end loop;
 end; $$;
 
--- Requires the pg_cron extension (enable once): create extension if not exists pg_cron;
+-- pg_cron: enables the scheduler for the monthly job below
 create extension if not exists pg_cron;
+-- Drop any existing job of the same name first so re-applying can't register a duplicate.
+select cron.unschedule('grant-lifetime-tokens-monthly')
+where exists (select 1 from cron.job where jobname = 'grant-lifetime-tokens-monthly');
 select cron.schedule(
   'grant-lifetime-tokens-monthly',
   '0 0 1 * *',

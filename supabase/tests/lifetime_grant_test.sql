@@ -11,8 +11,8 @@ select public.grant_lifetime_tokens();
 select public.grant_lifetime_tokens();
 
 select is((select balance from public.token_balances
-           where user_id = '00000000-0000-0000-0000-000000000003'), 1000,
-  'lifetime holder granted exactly 1000 (idempotent within the month)');
+           where user_id = '00000000-0000-0000-0000-000000000003'), 1015,
+  'lifetime holder balance is 15 signup + 1000 lifetime (idempotent within the month)');
 select is((select count(*)::int from public.token_ledger
            where user_id = '00000000-0000-0000-0000-000000000003'
              and reason = 'grant_lifetime'), 1,
