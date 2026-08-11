@@ -172,6 +172,11 @@ struct GenerateItineraryView: View {
         if config.useSavedPlaces {
             vm.preferredPlaceNames = savedPlaces.map(\.name)
         }
+        // Longer trips are a Pro perk.
+        if !(purchases?.isPro ?? false), config.durationDays > FreeLimits.tripDays {
+            showPaywall = true
+            return
+        }
         // Border Pass: multi-country is a Pro perk; free users pay once per trip.
         if config.multipleCountries, !(purchases?.isPro ?? false), !borderPassCharged {
             let paid = await tokens?.spend(FreeLimits.borderPassTokens, reason: "spend_border") ?? false

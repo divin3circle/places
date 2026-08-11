@@ -13,4 +13,10 @@ nonisolated enum FreeLimits {
 
     /// Token cost for a free user to plan a multi-country trip (Pro is free).
     static let borderPassTokens = 15
+
+    /// Max trip length (days) for a free user; longer trips are Pro.
+    static let tripDays = 5
+
+    /// Max bookmarks for a free user before the paywall.
+    static let bookmarks = 10
 }

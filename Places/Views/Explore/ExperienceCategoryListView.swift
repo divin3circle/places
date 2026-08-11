@@ -18,10 +18,12 @@ struct ExperienceCategoryListView: View {
     @Environment(\.router) private var router
     @Environment(ContentStore.self) private var content: ContentStore?
     @Environment(\.modelContext) private var context
+    @Environment(PurchasesManager.self) private var purchases: PurchasesManager?
     @Query private var savedPlaces: [SavedPlace]
 
     @State private var selectedTag: String
     @State private var searchText = ""
+    @State private var showPaywall = false
 
     init(category: ExperienceCategory, city: EACity = .nairobi) {
         self.category = category
@@ -61,6 +63,7 @@ struct ExperienceCategoryListView: View {
             .padding(.bottom, 40)
         }
         .scrollIndicators(.hidden)
+        .sheet(isPresented: $showPaywall) { PaywallView() }
         .task(id: selectedTag) {
             await content?.loadCategories()
             await content?.loadExperiences(cityId: city.rawValue, categoryTag: selectedTag)
@@ -152,6 +155,11 @@ struct ExperienceCategoryListView: View {
         if let existing = savedPlaces.first(where: { $0.kind == "experience" && $0.refId == dto.id.uuidString }) {
             context.delete(existing)
         } else {
+            // Free users are capped on bookmarks; over the limit shows the paywall.
+            if !(purchases?.isPro ?? false), savedPlaces.count >= FreeLimits.bookmarks {
+                showPaywall = true
+                return
+            }
             context.insert(SavedPlace(experience: dto))
         }
         try? context.save()
