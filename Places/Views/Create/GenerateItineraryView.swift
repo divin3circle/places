@@ -18,12 +18,17 @@ struct GenerateItineraryView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Environment(TokenStore.self) private var tokens: TokenStore?
+    @Environment(PurchasesManager.self) private var purchases: PurchasesManager?
     @Query private var savedPlaces: [SavedPlace]
+    @Query(sort: \SavedTrip.createdAt, order: .reverse) private var savedTrips: [SavedTrip]
     let config: TripConfig
 
     @State private var vm: ItineraryChatViewModel
     @State private var draft = ""
     @State private var showModelPicker = false
+    @State private var showPaywall = false
+    // Border Pass is charged once per trip. Resumed trips already paid at first generation.
+    @State private var borderPassCharged = false
     @State private var showSavedToast = false
     // Created once — never re-instantiate the Rive runtime on body re-renders.
     @State private var riveVM = RiveViewModel(fileName: "shapes")
@@ -42,6 +47,7 @@ struct GenerateItineraryView: View {
             travelers: 2, hasKids: false, expectation: "",
             multipleCountries: false, durationDays: 3, durationLabel: "")
         _vm = State(initialValue: ItineraryChatViewModel(resuming: trip))
+        _borderPassCharged = State(initialValue: true)
     }
 
     private let bottomAnchor = "chat-bottom"
@@ -106,6 +112,8 @@ struct GenerateItineraryView: View {
                                     set: { vm.paymentRequired = $0 })) {
             CoinShopView()
         }
+        // Pro-only wall (e.g. hit the free saved-trips cap).
+        .sheet(isPresented: $showPaywall) { PaywallView() }
         // Keep the Home-header balance honest after each generation (server debit).
         .onChange(of: vm.isGenerating) { _, generating in
             if !generating { Task { await tokens?.refresh() } }
@@ -148,12 +156,27 @@ struct GenerateItineraryView: View {
     }
 
     private func convertToTrip() {
+        // Free users are capped; a NEW save beyond the limit shows the paywall.
+        if vm.savedTripID == nil, !(purchases?.isPro ?? false), savedTrips.count >= FreeLimits.savedTrips {
+            showPaywall = true
+            return
+        }
         Task { await vm.saveAsTrip(context: modelContext) }
     }
 
     private func startGeneration() {
+        Task { await startGenerationGated() }
+    }
+
+    private func startGenerationGated() async {
         if config.useSavedPlaces {
             vm.preferredPlaceNames = savedPlaces.map(\.name)
+        }
+        // Border Pass: multi-country is a Pro perk; free users pay once per trip.
+        if config.multipleCountries, !(purchases?.isPro ?? false), !borderPassCharged {
+            let paid = await tokens?.spend(FreeLimits.borderPassTokens, reason: "spend_border") ?? false
+            if !paid { vm.paymentRequired = true; return }   // insufficient → coin shop
+            borderPassCharged = true
         }
         let kind = AIModelKind(rawValue: aiModelRaw) ?? .onDevice
         vm.start(kind: kind)
