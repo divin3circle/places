@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "7DE3951730179C0B00EE2527"
-               BuildableName = "Places.app"
+               BuildableName = "Places in East Africa.app"
                BlueprintName = "Places"
                ReferencedContainer = "container:Places.xcodeproj">
             </BuildableReference>
@@ -59,7 +59,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7DE3951730179C0B00EE2527"
-            BuildableName = "Places.app"
+            BuildableName = "Places in East Africa.app"
             BlueprintName = "Places"
             ReferencedContainer = "container:Places.xcodeproj">
          </BuildableReference>
@@ -76,7 +76,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7DE3951730179C0B00EE2527"
-            BuildableName = "Places.app"
+            BuildableName = "Places in East Africa.app"
             BlueprintName = "Places"
             ReferencedContainer = "container:Places.xcodeproj">
          </BuildableReference>
