@@ -107,13 +107,18 @@ struct GenerateItineraryView: View {
         .sheet(isPresented: $showModelPicker) {
             ModelPickerSheet(onDone: { startGeneration() })
         }
-        // Out of tokens → offer a top-up (user's coin shop).
+        // Out of tokens → offer a top-up (user's coin shop). If a gate blocked
+        // generation (nothing on screen yet), dismissing returns to Home.
         .sheet(isPresented: Binding(get: { vm.paymentRequired },
-                                    set: { vm.paymentRequired = $0 })) {
+                                    set: { vm.paymentRequired = $0 }),
+               onDismiss: { if vm.items.isEmpty { dismiss() } }) {
             CoinShopView()
         }
-        // Pro-only wall (e.g. hit the free saved-trips cap).
-        .sheet(isPresented: $showPaywall) { PaywallView() }
+        // Pro-only wall (e.g. hit the free saved-trips cap, or a Pro-only trip).
+        .sheet(isPresented: $showPaywall,
+               onDismiss: { if vm.items.isEmpty { dismiss() } }) {
+            PaywallView()
+        }
         // Keep the Home-header balance honest after each generation (server debit).
         .onChange(of: vm.isGenerating) { _, generating in
             if !generating { Task { await tokens?.refresh() } }
