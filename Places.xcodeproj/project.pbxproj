@@ -32,7 +32,7 @@
 
 /* Begin PBXFileReference section */
 		7D72F8F93028BFFD009A909E /* PlacesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlacesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		7DE3951830179C0B00EE2527 /* Places.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Places.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7DE3951830179C0B00EE2527 /* Places in East Africa.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Places in East Africa.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -89,7 +89,7 @@
 		7DE3951930179C0B00EE2527 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7DE3951830179C0B00EE2527 /* Places.app */,
+				7DE3951830179C0B00EE2527 /* Places in East Africa.app */,
 				7D72F8F93028BFFD009A909E /* PlacesTests.xctest */,
 			);
 			name = Products;
@@ -151,7 +151,7 @@
 				7D72F8F33028BFDD009A909E /* Supabase */,
 			);
 			productName = Places;
-			productReference = 7DE3951830179C0B00EE2527 /* Places.app */;
+			productReference = 7DE3951830179C0B00EE2527 /* Places in East Africa.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -430,7 +430,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sylusabel.Places;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Places in East Africa";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -463,7 +463,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sylusabel.Places;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "Places in East Africa";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
