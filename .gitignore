@@ -1,0 +1,14 @@
+
+# sourcekit-lsp build server (machine-specific paths)
+buildServer.json
+.build/
+
+# Stray xcodebuild -derivedDataPath ./build outputs (never commit; they inject
+# duplicate package checkouts into the source tree and break SPM resolution).
+build/
+
+# Private, un-tracked reference notes (strategy, business model, etc.)
+*.ignored.md
+
+# Claude Code local (machine-specific) settings
+.claude/settings.local.json

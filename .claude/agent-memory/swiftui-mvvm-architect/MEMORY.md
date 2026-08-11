@@ -1,0 +1,1 @@
+- [Places itinerary architecture](project-architecture.md) — iOS 26/Swift 6/MainActor, @Observable VMs, FoundationModels engine, known perf + correctness issues ranked
