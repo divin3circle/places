@@ -16,12 +16,15 @@ import SwiftfulRouting
 struct TripView: View {
     @Environment(\.router) private var router
     @Environment(\.modelContext) private var context
+    @Environment(PurchasesManager.self) private var purchases: PurchasesManager?
 
     @State private var vm: TripViewModel
     @State private var appeared = false
     @State private var showDeleteConfirm = false
     @State private var showEditor = false
     @State private var selectedDay = 0
+    @State private var pdfShare: ShareItem?
+    @State private var showPaywall = false
 
     init(trip: SavedTrip) {
         _vm = State(initialValue: TripViewModel(trip: trip))
@@ -61,6 +64,15 @@ struct TripView: View {
             }
         }) {
             GenerateItineraryView(trip: vm.trip)
+        }
+        .sheet(item: $pdfShare) { ActivityView(items: [$0.url]) }
+        .sheet(isPresented: $showPaywall) { PaywallView() }
+    }
+
+    private func exportPDF() {
+        guard purchases?.isPro == true else { showPaywall = true; return }
+        if let url = renderItineraryPDF(vm.itinerary, currency: vm.currency) {
+            pdfShare = ShareItem(url: url)
         }
     }
 
@@ -376,7 +388,14 @@ struct TripView: View {
 
                     Spacer()
 
-                    ShareLink(item: vm.shareText) {
+                    Menu {
+                        ShareLink("Share summary", item: vm.shareText)
+                        Button {
+                            exportPDF()
+                        } label: {
+                            Label("Export as PDF", systemImage: "doc.richtext")
+                        }
+                    } label: {
                         circleIcon("square.and.arrow.up")
                     }
                     .buttonStyle(PressableButtonStyle())
