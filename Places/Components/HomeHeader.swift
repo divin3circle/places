@@ -10,6 +10,8 @@ import SwiftUI
 struct HomeHeader: View {
   var onProfileTap: () -> Void = {}
   @Environment(SessionStore.self) private var session: SessionStore?
+  @Environment(TokenStore.self) private var tokens: TokenStore?
+  @State private var showCoins = false
 
   var body: some View {
     ZStack {
@@ -37,11 +39,19 @@ struct HomeHeader: View {
         Spacer()
         HStack(spacing: 16) {
           Button {
+            showCoins = true
           } label: {
-            Image(systemName: "centsign.circle")
-              .font(.system(size: 22))
-              .fontDesign(.rounded)
-              .foregroundStyle(.accent)
+            HStack(spacing: 5) {
+              Image(systemName: "centsign.circle")
+                .font(.system(size: 22))
+              if let balance = tokens?.balance {
+                Text("\(balance)")
+                  .font(.system(size: 15, weight: .semibold, design: .rounded))
+                  .contentTransition(.numericText())
+              }
+            }
+            .fontDesign(.rounded)
+            .foregroundStyle(.accent)
           }
           .compositingGroup()
           Button {
@@ -65,6 +75,8 @@ struct HomeHeader: View {
       .padding(.bottom, 8)
     }
     .background(.background)
+    .sheet(isPresented: $showCoins) { CoinShopView() }
+    .task { await tokens?.refresh() }
   }
 }
 
