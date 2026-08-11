@@ -27,6 +27,8 @@ Deno.serve(async (req: Request) => {
   const GRANTING = ["INITIAL_PURCHASE", "RENEWAL", "NON_RENEWING_PURCHASE"];
   const REVOKING = ["CANCELLATION", "EXPIRATION", "SUBSCRIPTION_PAUSED"];
 
+  // On any failure below we return a non-2xx so RevenueCat retries the delivery.
+  // grant_tokens_once dedups on (user, reason, ref), so a retry can't double-grant.
   if (GRANTING.includes(type) && productId) {
     const grant = grantForProduct(productId);
     if (grant) {
@@ -35,23 +37,35 @@ Deno.serve(async (req: Request) => {
       const ref = grant.reason === "grant_lifetime"
         ? new Date().toISOString().slice(0, 7) // YYYY-MM
         : (event.transaction_id ?? null);
-      await admin.rpc("grant_tokens", {
+      const { error } = await admin.rpc("grant_tokens_once", {
         p_user: userId, p_amount: grant.amount, p_reason: grant.reason, p_ref: ref,
       });
+      if (error) {
+        console.error("grant_tokens_once failed", error);
+        return new Response("grant failed", { status: 500 });
+      }
     }
     const plan = planForProduct(productId);
     if (plan) {
-      await admin.from("profiles").update({
+      const { error } = await admin.from("profiles").update({
         plan, plan_product: productId, rc_customer_id: userId,
         pro_expires_at: event.expiration_at_ms
           ? new Date(event.expiration_at_ms).toISOString() : null,
       }).eq("id", userId);
+      if (error) {
+        console.error("profiles plan sync (grant) failed", error);
+        return new Response("plan sync failed", { status: 500 });
+      }
     }
   } else if (REVOKING.includes(type)) {
     // Keep purchased tokens; drop pro access. (Lifetime does not expire.)
     if (productId !== "piea_pro_lifetime") {
-      await admin.from("profiles").update({ plan: "free", plan_product: null })
+      const { error } = await admin.from("profiles").update({ plan: "free", plan_product: null })
         .eq("id", userId);
+      if (error) {
+        console.error("profiles plan sync (revoke) failed", error);
+        return new Response("revoke failed", { status: 500 });
+      }
     }
   }
   // REFUND/chargeback clawback of unspent grant is handled in a follow-up;
