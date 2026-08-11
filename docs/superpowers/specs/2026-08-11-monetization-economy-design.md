@@ -91,7 +91,7 @@ Weekly / Monthly / Annual share one **subscription group** (`places_pro`); Lifet
 
 Apple shows KES equivalents automatically in the Kenya storefront.
 
-**Grant validation / cost safety:** all grants are metered, never "unlimited." Worst-case monthly COGS: Monthly 500 × $0.001 = $0.50 vs $4.49 (~85% gross after Apple); Lifetime 1000 × $0.001 = $1.00/mo forever vs a one-time $89.99 (~20 months' payback, then ~$12/yr max COGS — trivially safe). **Rollover cap 1,000** on subscription-granted tokens.
+**Grant validation / cost safety:** all grants are metered, never "unlimited." Worst-case monthly COGS: Monthly 500 × $0.001 = $0.50 vs $2.49 (~76% gross after Apple); Lifetime 1000 × $0.001 = $1.00/mo forever vs a one-time $49.99 (~20 months' payback, then ~$12/yr max COGS — trivially safe). **Rollover cap 1,000** on subscription-granted tokens.
 
 ## 5. Free vs Pro feature matrix
 
@@ -164,11 +164,11 @@ Reuse `profiles.plan` (`'free' | 'pro'`). Add:
 - Subscription tokens **expire at period end** (rollover cap 1,000); **purchased tokens never expire**.
 - **Supabase-authoritative** balance; RevenueCat VC = grant ledger.
 - **Border Pass = immediate 15-token spend** when a free user toggles multi-country.
-- Pricing **as confirmed** (§3.4, §4): Weekly $1.49 / Monthly $4.49 / Annual $39.99 / Lifetime $89.99; packs $0.99–$9.99.
+- Pricing **as confirmed** (§3.4, §4): Weekly $1.49 / Monthly $2.49 / Annual $14.99 / Lifetime $49.99; packs $0.99–$9.99.
 
 ## 10. Remaining open decisions
 
-- Confirm **Lifetime $89.99** and **annual token model** (6,000 up-front/yr vs a monthly job — spec uses up-front).
+- **Resolved:** Lifetime $49.99; annual token model = 6,000 up-front/yr (spec uses up-front). Prices live in App Store Connect.
 - Free trial / intro offer on Weekly or Monthly? (Not designed yet — a fast-follow.)
 
 ## 11. Scope & implementation decomposition
