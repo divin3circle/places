@@ -40,11 +40,6 @@ struct ExploreTab: View {
     ]
 
     @Query(sort: \SavedTrip.createdAt, order: .reverse) private var savedTrips: [SavedTrip]
-    /// Most recently planned trip, surfaced as the Explore hero (nil until one exists).
-    private var upcoming: UpcomingTrip? {
-        guard let latest = savedTrips.first else { return nil }
-        return UpcomingTrip(savedTrip: latest)
-    }
 
     var body: some View {
         GeometryReader { proxy in
@@ -252,9 +247,9 @@ struct ExploreTab: View {
     private var upcomingSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             sectionTitle("Your latest plan")
-            if let upcoming {
-                UpcomingTripCard(trip: upcoming) {
-                    pushDetail(title: upcoming.title, image: upcoming.coverImageName)
+            if let latest = savedTrips.first {
+                UpcomingTripCard(trip: UpcomingTrip(savedTrip: latest)) {
+                    router.showScreen(.push) { _ in TripView(trip: latest) }
                 }
             } else {
                 ContentEmptyState(icon: "airplane.departure",
@@ -318,12 +313,6 @@ struct ExploreTab: View {
         let base = dto.images.isEmpty ? [dto.bannerUrl] : dto.images
         guard base.count < 3, let first = base.first else { return base }
         return base + Array(repeating: first, count: 3 - base.count)
-    }
-
-    private func pushDetail(title: String, image: String) {
-        router.showScreen(.push) { _ in
-            ExploreDetailView(title: title, imageName: image)
-        }
     }
 
     private func pushDestination(_ dto: DestinationDTO) {

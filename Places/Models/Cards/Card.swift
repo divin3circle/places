@@ -15,6 +15,12 @@ struct Card: Identifiable {
     var cardType: String
 }
 
+struct ImageModel: Identifiable {
+    var id: String = UUID().uuidString
+    var altText: String
+    var image: String
+}
+
 extension Card {
     static let dummyCards: [Card] = [
         .init(cardBackground: "card-1", cardTitle: "Sylus A.", cardCategory: "DEBIT", cardType: "Mastercard"),

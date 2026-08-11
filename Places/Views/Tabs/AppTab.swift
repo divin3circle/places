@@ -42,7 +42,7 @@ struct AppTab: View {
                     .safeAreaPadding([.bottom], 15)
             }
             Tab.init(value: .trips) {
-                MyTripsView()
+                MyTrips()
                     .adoptForCustomTabBar($progress)
                     .hideNativeTabBar()
                     .scrollIndicators(.hidden)

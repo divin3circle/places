@@ -14,7 +14,7 @@ struct TripDetailSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             RemoteImage(trip.coverImageName, width: 360, height: 180)
-                .frame(height: 180)
+                .frame(height: 250)
                 .frame(maxWidth: .infinity)
                 .clipShape(.rect(cornerRadius: 20, style: .continuous))
 
@@ -32,8 +32,6 @@ struct TripDetailSheet: View {
                     .foregroundStyle(.secondary)
                     .padding(.top, 2)
             }
-
-            Spacer(minLength: 0)
 
             HStack(spacing: 10) {
                 Button(action: onEdit) {

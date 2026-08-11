@@ -15,7 +15,6 @@ struct HomeTab: View {
     @Environment(\.router) private var router
     @Environment(ContentStore.self) private var content: ContentStore?
     @Environment(SessionStore.self) private var session: SessionStore?
-    @Environment(SponsoredViewModel.self) private var sponsoredModel
 
     @State private var selectedSavedTrip: SavedTrip?
     @State private var tripToOpen: SavedTrip?
@@ -29,10 +28,10 @@ struct HomeTab: View {
 
     var body: some View {
         VStack(spacing: 28) {
-            forYouSection
+            ForYouSection()
             myTripsSection
             popularSection
-            sponsoredSection
+            SponsoredSection()
             exploreExperiencesSection
             popularExperiencesSection
         }
@@ -70,34 +69,6 @@ struct HomeTab: View {
 
     // MARK: Sections (sample data — For You / My Trips are later phases)
 
-    private var forYouSection: some View {
-        VStack(spacing: 8) {
-            SectionHeader(title: "For You", hasButton: false, action: {})
-            loadableSection(content?.forYou,
-                            empty: "Tell us what you love to see picks here.",
-                            retry: { await content?.loadForYou(interests: session?.currentProfile?.interests ?? [], force: true) }) { items in
-                carousel(items) { item in
-                    Button {
-                        routeForYou(item)
-                    } label: {
-                        PlaceCard(image: item.imageURL, title: item.title, subtitle: item.subtitle,
-                                  width: 300, imageHeight: 210)
-                    }
-                    .buttonStyle(PressableButtonStyle())
-                }
-            }
-        }
-    }
-
-    private func routeForYou(_ item: ForYouItem) {
-        switch item {
-        case .destination(let dto):
-            pushDestination(dto)
-        case .experience(let dto):
-            router.showScreen(.push) { _ in ExperienceDetailView(experience: Experience(dto: dto)) }
-        }
-    }
-
     private var myTripsSection: some View {
         VStack(spacing: 8) {
             SectionHeader(title: "My Trips", hasButton: true, action: {})
@@ -132,29 +103,6 @@ struct HomeTab: View {
                     } label: {
                         PlaceCard(image: dto.bannerUrl, title: dto.name, subtitle: dto.subtitleLabel,
                                   width: 175, imageHeight: 130)
-                    }
-                    .buttonStyle(PressableButtonStyle())
-                }
-            }
-        }
-    }
-
-    private var sponsoredSection: some View {
-        VStack(spacing: 8) {
-            SectionHeader(title: "Sponsored", hasButton: false, action: {})
-            loadableSection(content?.sponsored,
-                            empty: "No sponsors yet.",
-                            retry: { await content?.loadSponsored(force: true) }) { dtos in
-                carousel(dtos) { dto in
-                    let card = Sponsored(dto: dto)
-                    Button {
-                        withAnimation(.spring()) {
-                            sponsoredModel.selectedCard = card
-                            sponsoredModel.showCard = true
-                        }
-                    } label: {
-                        PlaceCard(image: card.image, title: card.title, subtitle: card.subtitle,
-                                  badge: "Sponsored", width: 185, imageHeight: 140)
                     }
                     .buttonStyle(PressableButtonStyle())
                 }
@@ -300,12 +248,6 @@ struct HomeTab: View {
     private func toggleExperienceSave(_ id: UUID) {
         withAnimation(.snappy) {
             if savedExperienceIds.contains(id) { savedExperienceIds.remove(id) } else { savedExperienceIds.insert(id) }
-        }
-    }
-
-    private func pushDetail(title: String, image: String) {
-        router.showScreen(.push) { _ in
-            ExploreDetailView(title: title, imageName: image)
         }
     }
 
