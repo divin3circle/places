@@ -153,6 +153,15 @@ function userPrompt(body: ReqBody): string {
   ].join("\n");
 }
 
+// Refund the debited tokens when generation fails after the debit. Best-effort,
+// but log failures so a silently-shortchanged user is at least traceable.
+async function refundTokens(admin: any, userId: string, cost: number) {
+  const { error } = await admin.rpc("grant_tokens", {
+    p_user: userId, p_amount: cost, p_reason: "refund_error", p_ref: null,
+  });
+  if (error) console.error("refund_error grant failed", error);
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -222,17 +231,13 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify(openaiBody),
     });
   } catch (e) {
-    await admin.rpc("grant_tokens", {
-      p_user: userId, p_amount: cost, p_reason: "refund_error", p_ref: null,
-    });
+    await refundTokens(admin, userId, cost);
     return json({ error: `Upstream request failed: ${e}` }, 502);
   }
 
   if (!res.ok) {
     const text = await res.text();
-    await admin.rpc("grant_tokens", {
-      p_user: userId, p_amount: cost, p_reason: "refund_error", p_ref: null,
-    });
+    await refundTokens(admin, userId, cost);
     return json({ error: `OpenAI error ${res.status}: ${text}` }, 502);
   }
 
@@ -240,14 +245,12 @@ Deno.serve(async (req: Request) => {
   try {
     data = await res.json();
   } catch {
-    await admin.rpc("grant_tokens", { p_user: userId, p_amount: cost, p_reason: "refund_error", p_ref: null });
+    await refundTokens(admin, userId, cost);
     return json({ error: "OpenAI returned a malformed response" }, 502);
   }
   const content = (data as any)?.choices?.[0]?.message?.content;
   if (typeof content !== "string") {
-    await admin.rpc("grant_tokens", {
-      p_user: userId, p_amount: cost, p_reason: "refund_error", p_ref: null,
-    });
+    await refundTokens(admin, userId, cost);
     return json({ error: "OpenAI returned no content" }, 502);
   }
 
@@ -255,9 +258,7 @@ Deno.serve(async (req: Request) => {
   try {
     itinerary = JSON.parse(content);
   } catch {
-    await admin.rpc("grant_tokens", {
-      p_user: userId, p_amount: cost, p_reason: "refund_error", p_ref: null,
-    });
+    await refundTokens(admin, userId, cost);
     return json({ error: "OpenAI returned malformed JSON" }, 502);
   }
 
