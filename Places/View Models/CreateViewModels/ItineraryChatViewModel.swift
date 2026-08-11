@@ -11,6 +11,7 @@
 import Foundation
 import Observation
 import SwiftData
+import CoreLocation
 
 struct ItineraryChatItem: Identifiable {
     enum Role { case user, assistant }
@@ -208,6 +209,50 @@ final class ItineraryChatViewModel {
 
     /// Once a stream finishes, replace model price estimates with grounded DB
     /// prices where the place is known, and refresh the shown message.
+    /// Pro: reorder each day's activities by proximity (greedy nearest-neighbor from
+    /// the day's first stop) using the grounded coordinates, cutting backtracking.
+    /// Records a new "Optimized" version. No-op if there's no itinerary yet.
+    func optimizeDays() {
+        guard var itinerary = lastFullItinerary else { return }
+        for d in itinerary.days.indices {
+            itinerary.days[d].activities = optimizedOrder(itinerary.days[d].activities)
+        }
+        lastFullItinerary = itinerary
+        if let id = items.last(where: { if case .itinerary = $0.kind { return true } else { return false } })?.id {
+            setKind(id: id, .itinerary(ItineraryDisplay(full: itinerary)))
+        }
+        recordVersion(note: "Optimized")
+    }
+
+    private func optimizedOrder(_ activities: [ItineraryActivity]) -> [ItineraryActivity] {
+        guard activities.count > 2 else { return activities }
+        var located: [(activity: ItineraryActivity, coord: CLLocationCoordinate2D)] = []
+        var unlocated: [ItineraryActivity] = []
+        for a in activities {
+            if let c = registry.resolve(a.placeName)?.coordinate {
+                located.append((a, c))
+            } else {
+                unlocated.append(a)
+            }
+        }
+        guard located.count > 2 else { return activities }
+        var remaining = located
+        var ordered = [remaining.removeFirst()]   // keep the day's first stop fixed
+        while !remaining.isEmpty {
+            let last = ordered[ordered.count - 1].coord
+            let nextIdx = remaining.indices.min(by: {
+                sqDistance(last, remaining[$0].coord) < sqDistance(last, remaining[$1].coord)
+            })!
+            ordered.append(remaining.remove(at: nextIdx))
+        }
+        return ordered.map(\.activity) + unlocated   // unresolved stops keep their order, appended
+    }
+
+    private func sqDistance(_ a: CLLocationCoordinate2D, _ b: CLLocationCoordinate2D) -> Double {
+        let dLat = a.latitude - b.latitude, dLon = a.longitude - b.longitude
+        return dLat * dLat + dLon * dLon
+    }
+
     private func groundFinalPrices(id: UUID) {
         guard let final = lastFullItinerary else { return }
         let grounded = final.withGroundedPrices { catalog.groundedPriceUSD(for: $0) }

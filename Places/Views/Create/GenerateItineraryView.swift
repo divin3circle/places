@@ -168,6 +168,12 @@ struct GenerateItineraryView: View {
         Task { await startGenerationGated() }
     }
 
+    /// Pro: reorder each day by proximity to cut backtracking (free → paywall).
+    private func optimizeDay() {
+        guard purchases?.isPro == true else { showPaywall = true; return }
+        vm.optimizeDays()
+    }
+
     private func startGenerationGated() async {
         if config.useSavedPlaces {
             vm.preferredPlaceNames = savedPlaces.map(\.name)
@@ -278,6 +284,13 @@ struct GenerateItineraryView: View {
                           systemImage: vm.savedTripID != nil ? "checkmark.circle" : "suitcase.fill")
                 }
                 .disabled(!vm.canSave || vm.isSaving)
+
+                Button {
+                    optimizeDay()
+                } label: {
+                    Label("Optimize day", systemImage: "wand.and.stars")
+                }
+                .disabled(vm.isGenerating)
 
                 Button { } label: { Label("Pin", systemImage: "pin") }
                 Button { } label: { Label("Find in chat", systemImage: "magnifyingglass") }
