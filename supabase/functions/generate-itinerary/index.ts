@@ -14,7 +14,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { costForAction } from "../_shared/cost.ts";
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
-const MODEL = "gpt-4o-mini";
+const MODEL = "gpt-4o-mini";      // free tier
+const PRO_MODEL = "gpt-4o";        // Pro tier — higher quality (higher COGS, capped by the token allotment)
 
 const ACTIVITY_KINDS = [
   "wildlife", "sightseeing", "foodAndDining", "lodging",
@@ -191,6 +192,10 @@ Deno.serve(async (req: Request) => {
   if (userErr || !userData?.user) return json({ error: "Unauthorized" }, 401);
   const userId = userData.user.id;
 
+  // Pro users get a higher-quality model; free users the standard one.
+  const { data: profileRow } = await admin.from("profiles").select("plan").eq("id", userId).single();
+  const chosenModel = profileRow?.plan === "pro" ? PRO_MODEL : MODEL;
+
   const cost = costForAction(body.mode, "cloud");
   const reason = body.mode === "refine" ? "spend_iter" : "spend_gen";
   const { error: spendErr } = await admin.rpc("spend_tokens", {
@@ -205,7 +210,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const openaiBody = {
-    model: MODEL,
+    model: chosenModel,
     messages: [
       { role: "system", content: systemPrompt(body.config) },
       { role: "user", content: userPrompt(body) },
