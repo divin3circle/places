@@ -10,6 +10,9 @@
 // Secret:  supabase secrets set OPENAI_API_KEY=sk-...
 // Invoke:  requires the project's anon key in the `apikey` + `Authorization` headers.
 
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { costForAction } from "../_shared/cost.ts";
+
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 const MODEL = "gpt-4o-mini";
 
@@ -167,6 +170,31 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Missing config or placeNames" }, 400);
   }
 
+  // --- Token debit (cloud generation) ---
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const admin = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+  const { data: userData, error: userErr } = await admin.auth.getUser(
+    authHeader.replace("Bearer ", ""),
+  );
+  if (userErr || !userData?.user) return json({ error: "Unauthorized" }, 401);
+  const userId = userData.user.id;
+
+  const cost = costForAction(body.mode, "cloud");
+  const reason = body.mode === "refine" ? "spend_iter" : "spend_gen";
+  const { error: spendErr } = await admin.rpc("spend_tokens", {
+    p_user: userId, p_cost: cost, p_reason: reason, p_ref: null,
+  });
+  if (spendErr) {
+    // P0001 = insufficient_tokens raised by spend_tokens
+    if (spendErr.message?.includes("insufficient_tokens")) {
+      return json({ error: "insufficient_tokens" }, 402);
+    }
+    return json({ error: `Token debit failed: ${spendErr.message}` }, 500);
+  }
+
   const openaiBody = {
     model: MODEL,
     messages: [
@@ -194,17 +222,26 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify(openaiBody),
     });
   } catch (e) {
+    await admin.rpc("grant_tokens", {
+      p_user: userId, p_amount: cost, p_reason: "refund_error", p_ref: null,
+    });
     return json({ error: `Upstream request failed: ${e}` }, 502);
   }
 
   if (!res.ok) {
     const text = await res.text();
+    await admin.rpc("grant_tokens", {
+      p_user: userId, p_amount: cost, p_reason: "refund_error", p_ref: null,
+    });
     return json({ error: `OpenAI error ${res.status}: ${text}` }, 502);
   }
 
   const data = await res.json();
   const content = data?.choices?.[0]?.message?.content;
   if (typeof content !== "string") {
+    await admin.rpc("grant_tokens", {
+      p_user: userId, p_amount: cost, p_reason: "refund_error", p_ref: null,
+    });
     return json({ error: "OpenAI returned no content" }, 502);
   }
 
@@ -212,6 +249,9 @@ Deno.serve(async (req: Request) => {
   try {
     itinerary = JSON.parse(content);
   } catch {
+    await admin.rpc("grant_tokens", {
+      p_user: userId, p_amount: cost, p_reason: "refund_error", p_ref: null,
+    });
     return json({ error: "OpenAI returned malformed JSON" }, 502);
   }
 
