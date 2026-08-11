@@ -236,8 +236,14 @@ Deno.serve(async (req: Request) => {
     return json({ error: `OpenAI error ${res.status}: ${text}` }, 502);
   }
 
-  const data = await res.json();
-  const content = data?.choices?.[0]?.message?.content;
+  let data: unknown;
+  try {
+    data = await res.json();
+  } catch {
+    await admin.rpc("grant_tokens", { p_user: userId, p_amount: cost, p_reason: "refund_error", p_ref: null });
+    return json({ error: "OpenAI returned a malformed response" }, 502);
+  }
+  const content = (data as any)?.choices?.[0]?.message?.content;
   if (typeof content !== "string") {
     await admin.rpc("grant_tokens", {
       p_user: userId, p_amount: cost, p_reason: "refund_error", p_ref: null,
