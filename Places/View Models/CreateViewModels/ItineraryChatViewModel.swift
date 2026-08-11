@@ -37,6 +37,8 @@ final class ItineraryChatViewModel {
     var items: [ItineraryChatItem] = []
     var isGenerating = false
     var errorMessage: String?
+    /// Set when generation was declined for lack of tokens — the view shows the coin shop.
+    var paymentRequired = false
 
     // "Convert to trip" state
     var isSaving = false
@@ -165,6 +167,9 @@ final class ItineraryChatViewModel {
                 recordVersion(note: "Original")
             } catch is CancellationError {
                 // dropped intentionally
+            } catch EngineError.paymentRequired {
+                paymentRequired = true
+                setKind(id: assistantId, .text("You're out of tokens. Top up to keep planning."))
             } catch {
                 errorMessage = error.localizedDescription
                 setKind(id: assistantId, .text("Couldn't generate the itinerary: \(error.localizedDescription)"))
@@ -191,6 +196,9 @@ final class ItineraryChatViewModel {
                 recordVersion(note: trimmed)
             } catch is CancellationError {
                 // dropped intentionally
+            } catch EngineError.paymentRequired {
+                paymentRequired = true
+                setKind(id: assistantId, .text("You're out of tokens. Top up to keep planning."))
             } catch {
                 setKind(id: assistantId, .text("Sorry — couldn't update the itinerary: \(error.localizedDescription)"))
             }

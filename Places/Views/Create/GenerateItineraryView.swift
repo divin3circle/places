@@ -17,6 +17,7 @@ import class RiveRuntime.RiveViewModel
 struct GenerateItineraryView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(TokenStore.self) private var tokens: TokenStore?
     @Query private var savedPlaces: [SavedPlace]
     let config: TripConfig
 
@@ -99,6 +100,15 @@ struct GenerateItineraryView: View {
         }
         .sheet(isPresented: $showModelPicker) {
             ModelPickerSheet(onDone: { startGeneration() })
+        }
+        // Out of tokens → offer a top-up (user's coin shop).
+        .sheet(isPresented: Binding(get: { vm.paymentRequired },
+                                    set: { vm.paymentRequired = $0 })) {
+            CoinShopView()
+        }
+        // Keep the Home-header balance honest after each generation (server debit).
+        .onChange(of: vm.isGenerating) { _, generating in
+            if !generating { Task { await tokens?.refresh() } }
         }
         .overlay(alignment: .top) { saveToast }
         .onChange(of: vm.savedTripID) { _, newValue in
