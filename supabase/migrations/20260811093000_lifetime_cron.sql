@@ -2,7 +2,7 @@ create or replace function public.grant_lifetime_tokens() returns void
 language plpgsql security definer set search_path = public as $$
 declare r record; v_period text := to_char(now(), 'YYYY-MM');
 begin
-  for r in select id from public.profiles where plan_product = 'pro_lifetime' loop
+  for r in select id from public.profiles where plan_product = 'piea_pro_lifetime' loop
     if not exists (
       select 1 from public.token_ledger
       where user_id = r.id and reason = 'grant_lifetime' and ref = v_period

@@ -71,10 +71,10 @@ USD tiers (Apple localizes). Margin shown after Apple's 15% SBP cut, worst case 
 
 | Pack | Product id | Tokens | USD | Net after Apple 15% | Max COGS | Net margin |
 |---|---|---|---|---|---|---|
-| Starter | `tokens_25` | 25 | $0.99 | $0.84 | $0.013 | ~98% |
-| Explorer | `tokens_75` | 75 | $1.99 | $1.69 | $0.038 | ~98% |
-| Voyager | `tokens_200` | 200 | $4.49 | $3.82 | $0.100 | ~97% |
-| Expedition | `tokens_500` | 500 | $9.99 | $8.49 | $0.250 | ~97% |
+| Starter | `tokens_99_25` | 25 | $0.99 | $0.84 | $0.013 | ~98% |
+| Explorer | `token_199_75` | 75 | $1.99 | $1.69 | $0.038 | ~98% |
+| Voyager | `token_449_200` | 200 | $4.49 | $3.82 | $0.100 | ~97% |
+| Expedition | `token_999_500` | 500 | $9.99 | $8.49 | $0.250 | ~97% |
 
 Purchased-pack tokens **never expire** (§9). $0.99 stays the floor — Apple's smallest standard tier.
 
@@ -84,10 +84,10 @@ Weekly / Monthly / Annual share one **subscription group** (`places_pro`); Lifet
 
 | Plan | Product id | Type | USD | Token grant |
 |---|---|---|---|---|
-| Weekly | `pro_weekly` | Auto-renewable (group `places_pro`) | **$1.49** | 50 / week |
-| Monthly | `pro_monthly` | Auto-renewable | **$4.49** | 500 / month |
-| Annual | `pro_annual` | Auto-renewable | **$39.99** | 500 / month (see §6 grant mechanics) |
-| Lifetime | `pro_lifetime` | Non-consumable (one-time) | **$89.99** | 1000 / month (via scheduled job) |
+| Weekly | `piea_149_1w` | Auto-renewable (group `places_pro`) | **$1.49** | 50 / week |
+| Monthly | `piea_249_1m` | Auto-renewable | **$2.49** | 500 / month |
+| Annual | `piea_999_1y` | Auto-renewable | **$14.99** | 500 / month (see §6 grant mechanics) |
+| Lifetime | `piea_pro_lifetime` | Non-consumable (one-time) | **$49.99** | 1000 / month (via scheduled job) |
 
 Apple shows KES equivalents automatically in the Kenya storefront.
 
@@ -114,18 +114,18 @@ Free is fully functional but à-la-carte — never hard-walled from the core mag
 
 Live objects created via the RevenueCat API (project **`projfd74cb43`**, app **`app9bae2fa48a`**, bundle `com.sylusabel.Places`):
 
-- **Entitlement** `pro` (`entl99dc06fb33`) ← attached: `pro_weekly`, `pro_monthly`, `pro_annual`, `pro_lifetime`. Token packs are **not** attached (no entitlement).
+- **Entitlement** `pro` (`entl99dc06fb33`) ← attached: `piea_149_1w`, `piea_249_1m`, `piea_999_1y`, `piea_pro_lifetime`. Token packs are **not** attached (no entitlement).
 - **Virtual Currency** `TOK` ("Places Tokens") with product grants:
-  - `pro_weekly` → 50 (expire at cycle end)
-  - `pro_monthly` → 500 (expire at cycle end)
-  - `pro_annual` → **6,000** (expire at cycle end) — a full year's 500/mo granted up front each renewal, so annual needs **no** monthly job
-  - `tokens_25/75/200/500` → 25/75/200/500 (**never expire**)
-  - `pro_lifetime` → **no RC grant**; handled by the scheduled job below
+  - `piea_149_1w` → 50 (expire at cycle end)
+  - `piea_249_1m` → 500 (expire at cycle end)
+  - `piea_999_1y` → **6,000** (expire at cycle end) — a full year's 500/mo granted up front each renewal, so annual needs **no** monthly job
+  - `tokens_99_25 / token_199_75 / token_449_200 / token_999_500` → 25/75/200/500 (**never expire**)
+  - `piea_pro_lifetime` → **no RC grant**; handled by the scheduled job below
 - **Offering** `default` (`ofrng8ea8b8249e`, current) → 8 packages: `$rc_weekly`, `$rc_monthly`, `$rc_annual`, `$rc_lifetime`, `$rc_custom_tokens_25/75/200/500`, each linked to its product.
 
 **Token-grant mechanics:**
 - **Weekly / Monthly / Annual** — granted automatically by RevenueCat's Virtual Currency **product grants** on each purchase/renewal (annual front-loads the year).
-- **Lifetime** — non-consumables don't renew, so a **scheduled Supabase job** (monthly cron) grants **1,000 TOK** to every active `pro_lifetime` holder. This is the only grant path RevenueCat can't automate.
+- **Lifetime** — non-consumables don't renew, so a **scheduled Supabase job** (monthly cron) grants **1,000 TOK** to every active `piea_pro_lifetime` holder. This is the only grant path RevenueCat can't automate.
 - **Spend** — deducted from the Supabase-authoritative balance on the generation hot path (§7); reconciled to RevenueCat's VC balance best-effort.
 
 **Sync flow:** App Store Server Notifications → RevenueCat → RevenueCat **webhook** (`INITIAL_PURCHASE`, `RENEWAL`, `NON_RENEWING_PURCHASE`, `CANCELLATION`, `EXPIRATION`, `PRODUCT_CHANGE`) → Supabase edge webhook handler updates `profiles.plan`, `pro_expires_at`, and mirrors token grants/claws into the ledger.
@@ -138,7 +138,7 @@ Reuse `profiles.plan` (`'free' | 'pro'`). Add:
 
 - `profiles.pro_expires_at timestamptz` — period/lifetime gating before a webhook lands.
 - `profiles.rc_customer_id text` — join RevenueCat → Supabase in webhooks.
-- `profiles.plan_product text` — which product is active (`pro_weekly`…`pro_lifetime`), so the lifetime job can target holders.
+- `profiles.plan_product text` — which product is active (`piea_149_1w`…`piea_pro_lifetime`), so the lifetime job can target holders.
 - `token_balances` — `user_id PK, balance int not null default 0 check (balance >= 0), updated_at`. Live spendable balance (source of truth).
 - `token_ledger` — append-only: `id, user_id, delta int, reason text, ref text, created_at`. `reason ∈ {grant_weekly, grant_monthly, grant_annual, grant_lifetime, grant_topup, grant_signup, spend_gen, spend_iter, spend_border, spend_offline, refund_error, clawback_refund, expire_cycle}`. Balance = Σ delta; auditable.
 - `offline_regions text[]` on profile (owned downloads).
