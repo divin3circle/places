@@ -23,6 +23,7 @@ struct ProfileTab: View {
 
       }
     }
+    .scrollIndicators(.hidden)
     .onScrollGeometryChange(for: CGFloat.self) {
       $0.contentInsets.top
     } action: { oldValue, newValue in

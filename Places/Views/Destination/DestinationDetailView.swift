@@ -169,10 +169,10 @@ struct DestinationDetailView: View {
                 statCard(icon: "star.fill", value: String(format: "%.1f", rating), label: "Rating", tint: .yellow)
             }
             if let fee = feeValue {
-                statCard(icon: "ticket.fill", value: fee, label: "Entry", tint: .accent)
+                statCard(icon: "ticket.fill", value: fee, label: "Entry", tint: .green)
             }
             if let best = shortBestTime {
-                statCard(icon: "calendar", value: best, label: "Best time", tint: .accent)
+                statCard(icon: "calendar", value: best, label: "Best time", tint: .blue)
             }
         }
     }
@@ -419,9 +419,9 @@ private struct FlowTags: View {
             ForEach(tags, id: \.self) { tag in
                 Text(tag)
                     .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(.accent)
+                    .foregroundStyle(.primary)
                     .padding(.horizontal, 12).padding(.vertical, 6)
-                    .background(.accent.opacity(0.12), in: .capsule)
+                    .background(Color(.secondarySystemBackground), in: .capsule)
             }
         }
     }

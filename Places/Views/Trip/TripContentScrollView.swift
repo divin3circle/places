@@ -50,6 +50,7 @@ struct TripContentScrollView<ScrollContent: View, SheetContent: View, BottomBar:
                 ScrollView(.vertical) {
                     scrollContent(progress)
                 }
+                .scrollIndicators(.hidden)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .onScrollGeometryChange(for: Bool.self, of: { $0.contentSize.height > ($0.contentSize.height - maximumSheetHeight) }, action: { oldValue, newValue in
                     isElligibleForGesture = newValue
@@ -75,6 +76,7 @@ struct TripContentScrollView<ScrollContent: View, SheetContent: View, BottomBar:
                 ScrollView(.vertical) {
                     sheetContent(progress)
                 }
+                .scrollIndicators(.hidden)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .safeAreaPadding(.top, 30)
                 .scrollPosition($sheetScrollPosition)
