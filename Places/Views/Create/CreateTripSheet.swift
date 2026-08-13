@@ -50,8 +50,10 @@ struct CreateTripSheet: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color(.systemBackground))
-        .presentationDetents([.height(360), .medium], selection: $detent)
-        .presentationDragIndicator(.visible)
+        // Pitch is a compact sheet; once planning starts we lock to full height
+        // (no minimize) so the wizard isn't cramped.
+        .presentationDetents(isPlanning ? [.large] : [.height(360)], selection: $detent)
+        .presentationDragIndicator(isPlanning ? .hidden : .visible)
         .presentationBackground(Color(.systemBackground))
     }
 
@@ -74,7 +76,7 @@ struct CreateTripSheet: View {
             .padding(.bottom)
 
             VStack(spacing: 10) {
-                Text("14 days free, then $0.99 / month")
+                Text("Start with free tokens — go Pro anytime")
                     .font(.system(size: 12, design: .rounded))
                     .foregroundStyle(.secondary)
 
@@ -82,7 +84,7 @@ struct CreateTripSheet: View {
                 Button {
                     withAnimation(.snappy) {
                         isPlanning = true
-                        detent = .medium
+                        detent = .large
                     }
                 } label: {
                     Text("Start planning")

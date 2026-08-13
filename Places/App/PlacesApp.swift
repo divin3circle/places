@@ -29,6 +29,9 @@ struct PlacesApp: App {
     // Supabase-authoritative token balance.
     @State private var tokens = TokenStore()
 
+    // Network reachability for the offline banner.
+    @State private var connectivity = Connectivity()
+
     var body: some Scene {
         WindowGroup {
             RouterView { _ in
@@ -40,6 +43,7 @@ struct PlacesApp: App {
             .environment(content)
             .environment(purchases)
             .environment(tokens)
+            .environment(connectivity)
             .task {
                 purchases.configure()
                 await session.bootstrap()

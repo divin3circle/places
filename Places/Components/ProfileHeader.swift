@@ -12,11 +12,20 @@ import PhotosUI
 struct ProfileHeader: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.router) private var router
+    @Environment(\.openURL) private var openURL
     @Binding var isLargerHeader: Bool
     @Binding var topInset: CGFloat
+    /// Switches the root tab (used by the "Saved" action → Trips tab).
+    var onSwitchTab: (AppTabs) -> Void = { _ in }
 
     @Environment(SessionStore.self) private var session: SessionStore?
     @Environment(PurchasesManager.self) private var purchases: PurchasesManager?
+
+    // Stub links until the marketing site's pages are live (see task: site update).
+    private let supportURL = URL(string: "https://places-web.vercel.app/support")!
+    private let contactURL = URL(string: "mailto:sylusabel1@gmail.com")!
+    private let privacyURL = URL(string: "https://places-web.vercel.app/privacy")!
+    private let termsURL = URL(string: "https://places-web.vercel.app/terms")!
 
     @State private var pickedItem: PhotosPickerItem?
     @State private var isUploading = false
@@ -35,9 +44,12 @@ struct ProfileHeader: View {
                     .frame(width: 100, height: isLargerHeader ? 300 : 100)
                     .clipShape(.circle)
                     .overlay {
-                        // Lifetime members get an animated gold avatar frame.
+                        // Lifetime members get an animated gold avatar frame. Sized
+                        // to hug the avatar in both states (expanded avatar ≈ 200pt,
+                        // so the frame overshot at 300 — Image 22).
                         if isLifetime {
-                            LifetimeFrameView(size: isLargerHeader ? 300 : 132)
+                            LifetimeFrameView(size: isLargerHeader ? 235 : 132)
+                                .allowsHitTesting(false)
                         }
                     }
                     .overlay {
@@ -143,7 +155,7 @@ struct ProfileHeader: View {
     @ViewBuilder
     private func CustomNavigationBar() -> some View {
         VStack(alignment: .center, spacing: 6) {
-            HStack(spacing: 8) {
+            HStack(spacing: 2) {
                 Text(displayName)
                     .fontDesign(.rounded)
                     .font(.title)
@@ -222,15 +234,50 @@ struct ProfileHeader: View {
             CustomActionButton(isLargerHeader: isLargerHeader, icon: "airplane.up.right.app.fill", title: "Trips", onTap: {
                 router.showScreen(.push) { _ in MyTripsView() }
             })
-            CustomActionButton(isLargerHeader: isLargerHeader, icon: "wallet.bifold.fill", title: "Wallet", onTap: {
-                router.showScreen(.push) { _ in Wallets() }
+            CustomActionButton(isLargerHeader: isLargerHeader, icon: "bookmark.fill", title: "Saved", onTap: {
+                onSwitchTab(.trips)
             })
             CustomActionButton(isLargerHeader: isLargerHeader, icon: "rectangle.portrait.and.arrow.forward", title: "Logout", onTap: {
                 router.dismissAllScreens()
                 Task { await session?.signOut() }
             })
-            CustomActionButton(isLargerHeader: isLargerHeader, icon: "ellipsis", title: "More", onTap: {})
+            Menu {
+                Button { openURL(supportURL) } label: { Label("Report an issue", systemImage: "exclamationmark.bubble") }
+                Button { openURL(contactURL) } label: { Label("Contact developer", systemImage: "envelope") }
+                Button { openURL(privacyURL) } label: { Label("Privacy Policy", systemImage: "hand.raised") }
+                Button { openURL(termsURL) } label: { Label("Terms of Service", systemImage: "doc.text") }
+            } label: {
+                actionButtonLabel(icon: "ellipsis", title: "More")
+            }
         }
+    }
+
+    /// The visual for an action tile (shared by the More menu so it matches the
+    /// CustomActionButton tiles exactly).
+    @ViewBuilder
+    private func actionButtonLabel(icon: String, title: String) -> some View {
+        VStack(spacing: 2) {
+            Image(systemName: icon)
+                .font(.title)
+                .frame(height: 30)
+            Text(title)
+                .font(.caption)
+                .fontDesign(.rounded)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 5)
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(.background)
+                    .opacity(isLargerHeader ? 0 : 1)
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(.ultraThinMaterial)
+                    .opacity(isLargerHeader ? 0.8 : 0)
+                    .environment(\.colorScheme, .dark)
+            }
+        }
+        .contentShape(.rect)
     }
     
     struct CustomActionButton: View {

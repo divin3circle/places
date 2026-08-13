@@ -111,8 +111,11 @@ struct CreateTripForm: View {
                             }
                         }
                     }
+                    .padding(.horizontal, 20)
                 }
                 .scrollIndicators(.hidden)
+                // Bleed past the form's 20pt padding so pills run edge-to-edge.
+                .padding(.horizontal, -20)
 
                 if vm.durationPreset == .custom {
                     stepper(value: vm.customDays, unit: vm.customDays == 1 ? "day" : "days",
@@ -125,14 +128,20 @@ struct CreateTripForm: View {
 
     private var preferencesStep: some View {
         stepScaffold(icon: "slider.horizontal.3", title: "A few preferences", subtitle: "Fine-tune the plan.") {
-            VStack(alignment: .leading, spacing: 20) {
-                VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 34) {
+                HStack(spacing: 12) {
+                    Image(systemName: "calendar")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.secondary)
                     Text("Start date")
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    Spacer()
                     DatePicker("", selection: $vm.startDate, in: Date.now..., displayedComponents: .date)
                         .labelsHidden()
                         .datePickerStyle(.compact)
                 }
+                .padding(14)
+                .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 16))
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Budget currency")
@@ -142,6 +151,7 @@ struct CreateTripForm: View {
                         choicePill("KSh", selected: vm.currency == .kes) { withAnimation(.snappy) { vm.currency = .kes } }
                     }
                 }
+                Spacer()
 
                 if !savedPlaces.isEmpty {
                     Toggle(isOn: $vm.useSavedPlaces) {
@@ -183,15 +193,37 @@ struct CreateTripForm: View {
                 }
             }
             .microAnimations(delay: 0.12, slideDirection: .Bottom, offsetAmount: 16)
-            
-            Spacer()
 
-            content()
-                .microAnimations(delay: 0.22, slideDirection: .Bottom, offsetAmount: 20)
+            if vm.isLastStep {
+                // Content-dense final step — no animation; content flows from here.
+                content()
+                    .microAnimations(delay: 0.22, slideDirection: .Bottom, offsetAmount: 20)
+            } else {
+                // Fill the roomy full-height sheet with the reused trip animation.
+                LottieAnimationLoader(fileName: resolveLottieAnimation(icon), loop: true, loopCount: 2, autoPlay: true, )
+                    .microAnimations(delay: 0.18, slideDirection: .Bottom, offsetAmount: 16)
+                Spacer()
+                content()
+                    .microAnimations(delay: 0.28, slideDirection: .Bottom, offsetAmount: 20)
+            }
 
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private func resolveLottieAnimation(_ icon: String) -> String {
+        if icon == "person.2.fill" {
+            return "travel"
+        } else if icon == "figure.and.child.holdinghands" {
+            return "onboarding-animation"
+        } else if icon == "sparkles" {
+            return "generate"
+        } else if icon == "globe.americas.fill" {
+            return "feature-animation1"
+        } else {
+            return "travel"
+        }
     }
 
     private func stepper(value: Int, unit: String, onMinus: @escaping () -> Void, onPlus: @escaping () -> Void) -> some View {

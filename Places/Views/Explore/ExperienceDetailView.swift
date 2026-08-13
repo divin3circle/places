@@ -13,6 +13,8 @@ import SwiftUI
 struct ExperienceDetailView: View {
     let experience: Experience
 
+    private let galleryHeight: CGFloat = 340
+
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
@@ -24,18 +26,25 @@ struct ExperienceDetailView: View {
         .ignoresSafeArea(edges: .top)
     }
 
+    // Paged hero that stretches on pull-down (grows downward, pinned at the top).
     private var gallery: some View {
-        TabView {
-            ForEach(experience.imageNames, id: \.self) { name in
-                RemoteImage(name, width: 400, height: 340)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 340)
-                    .clipped()
+        GeometryReader { proxy in
+            let minY = proxy.frame(in: .global).minY
+            let stretch = max(0, minY)
+            TabView {
+                ForEach(experience.imageNames, id: \.self) { name in
+                    RemoteImage(name, width: 400, height: galleryHeight)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: galleryHeight + stretch)
+                        .clipped()
+                }
             }
+            .frame(width: proxy.size.width, height: galleryHeight + stretch)
+            .tabViewStyle(.page)
+            .indexViewStyle(.page(backgroundDisplayMode: .always))
+            .offset(y: -stretch)
         }
-        .frame(height: 340)
-        .tabViewStyle(.page)
-        .indexViewStyle(.page(backgroundDisplayMode: .always))
+        .frame(height: galleryHeight)
     }
 }
 

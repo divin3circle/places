@@ -100,7 +100,8 @@ final class PurchasesManager {
             if let meta = Self.subMeta[pkg.identifier] {
                 subs.append(SubOption(id: pkg.identifier, title: meta.title,
                                       priceString: price, periodLabel: meta.period,
-                                      monthlyTokens: meta.tokens, isBestValue: meta.best))
+                                      monthlyTokens: meta.tokens, isBestValue: meta.best,
+                                      trialLabel: Self.trialLabel(pkg.storeProduct)))
             } else if let tokens = Self.coinTokens[pkg.identifier] {
                 coins.append(CoinPack(id: pkg.identifier, tokens: tokens, priceString: price))
             }
@@ -137,5 +138,21 @@ final class PurchasesManager {
     ]
     private static func subOrder(_ id: String) -> Int {
         ["$rc_weekly": 0, "$rc_monthly": 1, "$rc_annual": 2, "$rc_lifetime": 3][id] ?? 99
+    }
+
+    /// A short "N-day free trial" label from the product's intro offer, or nil.
+    /// Reads Apple's StoreKit offer via RevenueCat — no hardcoded copy.
+    private static func trialLabel(_ product: StoreProduct) -> String? {
+        guard let intro = product.introductoryDiscount, intro.paymentMode == .freeTrial else { return nil }
+        let period = intro.subscriptionPeriod
+        let unit: String
+        switch period.unit {
+        case .day: unit = "day"
+        case .week: unit = "week"
+        case .month: unit = "month"
+        case .year: unit = "year"
+        @unknown default: unit = "day"
+        }
+        return "\(period.value)-\(unit) free trial"
     }
 }

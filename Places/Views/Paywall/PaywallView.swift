@@ -153,6 +153,11 @@ struct PaywallView: View {
                     Text("\(plan.monthlyTokens) tokens / month")
                         .font(.system(size: 13, design: .rounded))
                         .foregroundStyle(.secondary)
+                    if let trial = plan.trialLabel {
+                        Text(trial)
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.green)
+                    }
                 }
                 Spacer(minLength: 0)
                 VStack(alignment: .trailing, spacing: 1) {
@@ -190,10 +195,9 @@ struct PaywallView: View {
                 Button("Buy tokens instead") { showCoins = true }
                     .foregroundStyle(.accent)
                 Text("·").foregroundStyle(.secondary)
-                // TODO: swap in your real Terms / Privacy URLs before submission.
-                Link("Terms", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+                Link("Terms", destination: URL(string: "https://places-web.vercel.app/terms")!)
                     .foregroundStyle(.secondary)
-                Link("Privacy", destination: URL(string: "https://places.app/privacy")!)
+                Link("Privacy", destination: URL(string: "https://places-web.vercel.app/privacy")!)
                     .foregroundStyle(.secondary)
             }
             .font(.system(size: 12, design: .rounded))
@@ -207,6 +211,7 @@ struct PaywallView: View {
     private var ctaTitle: String {
         guard let id = selectedId,
               let plan = purchases?.subscriptions.first(where: { $0.id == id }) else { return "Continue" }
+        if let trial = plan.trialLabel { return "Start \(trial)" }
         return plan.id == "$rc_lifetime" ? "Unlock Lifetime" : "Start \(plan.title)"
     }
 

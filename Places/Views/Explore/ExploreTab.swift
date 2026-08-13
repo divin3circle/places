@@ -82,9 +82,12 @@ struct ExploreTab: View {
                             .buttonStyle(PressableButtonStyle())
                     }
                 }
+                .padding(.horizontal, 15)
                 .padding(.vertical, 2)
             }
             .scrollIndicators(.hidden)
+            // Bleed past the parent's 15pt padding so pills run edge-to-edge.
+            .padding(.horizontal, -15)
         }
     }
 
@@ -92,7 +95,7 @@ struct ExploreTab: View {
         VStack(spacing: 8) {
             Image(systemName: link.icon)
                 .font(.system(size: 20))
-                .foregroundStyle(.accent)
+                .foregroundStyle(.primary)
                 .frame(width: 56, height: 56)
                 .background(Color(.secondarySystemBackground), in: .circle)
             Text(link.title)
@@ -124,7 +127,7 @@ struct ExploreTab: View {
                         .foregroundStyle(.white)
                         .padding(14)
                 }
-                .frame(height: 150)
+                .frame(height: 210)
                 .clipShape(.rect(cornerRadius: 20, style: .continuous))
             }
             .buttonStyle(PressableButtonStyle())

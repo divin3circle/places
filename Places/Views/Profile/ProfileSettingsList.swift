@@ -23,10 +23,10 @@ struct ProfileSettingsList: View {
     @Environment(PurchasesManager.self) private var purchases: PurchasesManager?
     @State private var showPaywall = false
 
-    private let termsURL = URL(string: "https://places.app/terms")!
-    private let privacyURL = URL(string: "https://places.app/privacy")!
-    private let faqURL = URL(string: "https://places.app/faq")!
-    private let feedbackURL = URL(string: "mailto:support@places.app?subject=Places%20Feedback")!
+    private let termsURL = URL(string: "https://places-web.vercel.app/terms")!
+    private let privacyURL = URL(string: "https://places-web.vercel.app/privacy")!
+    private let faqURL = URL(string: "https://places-web.vercel.app/support")!
+    private let feedbackURL = URL(string: "mailto:sylusabel1@gmail.com?subject=Places%20Feedback")!
 
     private var appearance: Binding<AppearanceMode> {
         Binding(
@@ -93,12 +93,15 @@ struct ProfileSettingsList: View {
 
     private var accountActionsSection: some View {
         SettingsSection {
+            #if DEBUG
+            // Debug-only: never ship the onboarding reset to real users.
             SettingsRow(
                 icon: "arrow.counterclockwise",
                 title: "Reset onboarding (debug)",
                 accessory: .chevron,
                 onTap: resetOnboarding
             )
+            #endif
             SettingsRow(
                 icon: "rectangle.portrait.and.arrow.forward",
                 title: "Log out",

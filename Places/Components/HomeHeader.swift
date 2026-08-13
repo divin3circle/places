@@ -37,40 +37,27 @@ struct HomeHeader: View {
         }
         .buttonStyle(.plain)
         Spacer()
-        HStack(spacing: 16) {
-          Button {
-            showCoins = true
-          } label: {
-            HStack(spacing: 5) {
-              Image(systemName: "centsign.circle")
-                .font(.system(size: 22))
-              if let balance = tokens?.balance {
-                Text("\(balance)")
-                  .font(.system(size: 15, weight: .semibold, design: .rounded))
-                  .contentTransition(.numericText())
-              }
+        Button {
+          showCoins = true
+        } label: {
+          HStack(spacing: 5) {
+            Image("TokenCoin")
+              .resizable()
+              .scaledToFit()
+              .frame(width: 22, height: 22)
+            if let balance = tokens?.balance {
+              Text("\(balance)")
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
+                .foregroundStyle(.primary)
+                .contentTransition(.numericText())
             }
-            .fontDesign(.rounded)
-            .foregroundStyle(.accent)
           }
-          .compositingGroup()
-          Button {
-          } label: {
-            Image(systemName: "bell")
-              .font(.system(size: 22))
-              .fontDesign(.rounded)
-              .foregroundStyle(.foreground)
-          }
-          .overlay(
-            Circle()
-              .fill(.accent)
-              .frame(width: 8, height: 8)
-              .background(Color.red)
-              .clipShape(Circle())
-              .offset(x: -3, y: 4),
-            alignment: .topTrailing
-          )
+          .padding(.leading, 10)
+          .padding(.trailing, 12)
+          .padding(.vertical, 6)
+          .background(Color(.secondarySystemBackground), in: .capsule)
         }
+        .compositingGroup()
       }
       .padding(.bottom, 8)
     }

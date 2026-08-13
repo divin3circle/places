@@ -15,3 +15,6 @@ build/
 
 # Supabase CLI local link state (machine-specific)
 supabase/.temp/
+
+# Generated App Store screenshots (large binaries; uploaded to ASC, not tracked)
+appstore/

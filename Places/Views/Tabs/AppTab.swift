@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct AppTab: View {
+    @Environment(Connectivity.self) private var connectivity: Connectivity?
+    @Environment(SessionStore.self) private var session: SessionStore?
     @State private var activeTab: AppTabs = .home
     @State private var progress: CGFloat = 0
     @State private var showCreate: Bool = false
@@ -21,7 +23,8 @@ struct AppTab: View {
         TabView(selection: $activeTab) {
             Tab.init(value: .home) {
                 ScrollView(.vertical) {
-                   HomeTab(sponsoredAnimation: sponsoredAnimation)
+                   HomeTab(sponsoredAnimation: sponsoredAnimation,
+                           onSwitchTab: { activeTab = $0 })
                 }
                 .scrollableHeader(dismissDistance: 60, header: {
                     HomeHeader(onProfileTap: { activeTab = .profile })
@@ -52,7 +55,7 @@ struct AppTab: View {
             // Lounges (Chats) is hidden for v1 — no messaging backend yet. Restore
             // this Tab + the .lounges entry in CustomTabBar when Chats is built.
             Tab.init(value: .profile) {
-                ProfileTab()
+                ProfileTab(onSwitchTab: { activeTab = $0 })
                     .adoptForCustomTabBar($progress)
                     .hideNativeTabBar()
                     .scrollIndicators(.hidden)
@@ -88,6 +91,17 @@ struct AppTab: View {
                 SponsoredDetails(animation: sponsoredAnimation)
                     .transition(.opacity)
             }
+        }
+        .overlay(alignment: .top) {
+            if connectivity?.isOnline == false {
+                OfflineBanner()
+            }
+        }
+        .animation(.snappy, value: connectivity?.isOnline)
+        // Self-heal a stale/synthesized profile (e.g. default avatar) whenever the
+        // app surfaces or connectivity returns — no logout/login needed.
+        .task(id: connectivity?.isOnline) {
+            if connectivity?.isOnline != false { await session?.refreshProfile() }
         }
         .environment(sponsoredViewModel)
         .sheet(isPresented: $showCreate, onDismiss: {

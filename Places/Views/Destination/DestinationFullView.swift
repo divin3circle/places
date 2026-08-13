@@ -29,16 +29,20 @@ struct DestinationFullView<Header: View, Content: View>: View {
                     } header: {
                         GeometryReader { _ in
                             let progress: CGFloat = min(max(offsetY / (maximumHeight - minimumHeight), 0), 1)
-                            let resizedHeight = (maximumHeight + safeArea.top) - (maximumHeight - minimumHeight) * progress
-                            
+                            // Overscroll at the very top → grow the header so the hero
+                            // image stretches (classic parallax) instead of leaving a gap.
+                            let stretch: CGFloat = offsetY < 0 ? -offsetY : 0
+                            let resizedHeight = (maximumHeight + safeArea.top) - (maximumHeight - minimumHeight) * progress + stretch
+
                             header(progress, safeArea)
                                 .frame(height: resizedHeight, alignment: .bottom)
-                                .offset(y: isSticky ? (offsetY < 0 ? offsetY : 0) : 0)
+                                .offset(y: offsetY < 0 ? offsetY : 0)
                         }
                         .frame(height: maximumHeight + safeArea.top)
                     }
                 }
             }
+            .scrollIndicators(.hidden)
             .ignoresSafeArea(.container, edges: ignoresSafeAreaTop ? [.top] : [])
             .onScrollGeometryChange(for: CGFloat.self) { $0.contentOffset.y + $0.contentInsets.top } action: { oldValue, newValue in
                 offsetY = newValue
