@@ -20,6 +20,7 @@ struct DestinationDetailView: View {
     @Environment(\.router) private var router
     @Environment(\.openURL) private var openURL
     @Environment(\.modelContext) private var context
+    @Environment(PurchasesManager.self) private var purchases: PurchasesManager?
 
     @Query private var savedPlaces: [SavedPlace]
     private var isSaved: Bool {
@@ -27,6 +28,7 @@ struct DestinationDetailView: View {
     }
 
     @State private var appeared = false
+    @State private var showPaywall = false
     @State private var showCreate = false
     @State private var pendingConfig: TripConfig?
     @State private var itineraryConfig: TripConfig?
@@ -67,6 +69,7 @@ struct DestinationDetailView: View {
         .fullScreenCover(item: $itineraryConfig) { config in
             GenerateItineraryView(config: config)
         }
+        .sheet(isPresented: $showPaywall) { PaywallView() }
     }
 
     // MARK: Header (collapsing hero)
@@ -390,6 +393,11 @@ struct DestinationDetailView: View {
         if let existing = savedPlaces.first(where: { $0.kind == "destination" && $0.refId == destination.id }) {
             context.delete(existing)
         } else {
+            // Free users are capped on bookmarks; over the limit shows the paywall.
+            if !(purchases?.isPro ?? false), savedPlaces.count >= FreeLimits.bookmarks {
+                showPaywall = true
+                return
+            }
             context.insert(SavedPlace(destination: destination))
         }
         try? context.save()

@@ -40,11 +40,14 @@ extension ItineraryEngine {
 enum EngineError: LocalizedError {
     case notImplemented
     case unavailable(String)
+    /// The server (or a client-side check) declined for lack of tokens — surface the paywall.
+    case paymentRequired
 
     var errorDescription: String? {
         switch self {
         case .notImplemented: "Cloud generation isn't wired up yet — switch to on-device for now."
         case .unavailable(let message): message
+        case .paymentRequired: "You're out of tokens. Top up to keep planning."
         }
     }
 }

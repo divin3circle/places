@@ -23,6 +23,12 @@ struct PlacesApp: App {
     // Fetched Home/Explore content (in-memory).
     @State private var content = ContentStore(content: SupabaseContentRepository())
 
+    // RevenueCat purchases + entitlement (paywall data source).
+    @State private var purchases = PurchasesManager()
+
+    // Supabase-authoritative token balance.
+    @State private var tokens = TokenStore()
+
     var body: some Scene {
         WindowGroup {
             RouterView { _ in
@@ -32,7 +38,25 @@ struct PlacesApp: App {
             .preferredColorScheme(AppearanceMode(rawValue: appearanceRaw)?.colorScheme)
             .environment(session)
             .environment(content)
-            .task { await session.bootstrap() }
+            .environment(purchases)
+            .environment(tokens)
+            .task {
+                purchases.configure()
+                await session.bootstrap()
+            }
+            // Link RevenueCat to the Supabase user whenever we have one (bootstrap
+            // or fresh sign-in) — the webhook keys token grants on this id — then
+            // load the token balance. Clear both on sign-out.
+            .task(id: session.currentProfile?.id) {
+                guard let id = session.currentProfile?.id else {
+                    tokens.clear()
+                    await purchases.logOut()
+                    return
+                }
+                purchases.configure()
+                await purchases.logIn(userId: id.uuidString)
+                await tokens.refresh()
+            }
         }
         // On-device store for saved trips + bookmarks (no CloudKit).
         .modelContainer(for: [SavedTrip.self, SavedItineraryVersion.self, SavedPlace.self])

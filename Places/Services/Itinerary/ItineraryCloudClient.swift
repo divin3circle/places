@@ -11,6 +11,7 @@
 //
 
 import Foundation
+import Supabase
 
 /// Body POSTed to the `generate-itinerary` Edge Function.
 struct CloudItineraryRequest: Codable {
@@ -50,12 +51,19 @@ enum ItineraryCloudClient {
         req.timeoutInterval = 60
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.setValue(SupabaseConfig.anonKey, forHTTPHeaderField: "apikey")
-        req.setValue("Bearer \(SupabaseConfig.anonKey)", forHTTPHeaderField: "Authorization")
+        // Send the signed-in user's JWT so the function identifies the user and
+        // debits their tokens. Falls back to the anon key (which the function rejects).
+        let bearer = (try? await SupabaseService.client.auth.session.accessToken) ?? SupabaseConfig.anonKey
+        req.setValue("Bearer \(bearer)", forHTTPHeaderField: "Authorization")
         req.httpBody = try JSONEncoder().encode(request)
 
         let (data, response) = try await URLSession.shared.data(for: req)
         guard let http = response as? HTTPURLResponse else {
             throw EngineError.unavailable("No response from the server.")
+        }
+        // 402 = insufficient_tokens (from the token debit) → route to the paywall.
+        if http.statusCode == 402 {
+            throw EngineError.paymentRequired
         }
         guard (200..<300).contains(http.statusCode) else {
             let body = String(data: data, encoding: .utf8) ?? ""

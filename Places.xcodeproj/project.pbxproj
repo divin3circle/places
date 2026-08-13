@@ -14,6 +14,8 @@
 		7D72F8F03028BFDD009A909E /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = 7D72F8EF3028BFDD009A909E /* Realtime */; };
 		7D72F8F23028BFDD009A909E /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 7D72F8F13028BFDD009A909E /* Storage */; };
 		7D72F8F43028BFDD009A909E /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 7D72F8F33028BFDD009A909E /* Supabase */; };
+		7D776DF7302B3B08007EE0E8 /* ReceiptParser in Frameworks */ = {isa = PBXBuildFile; productRef = 7D776DF6302B3B08007EE0E8 /* ReceiptParser */; };
+		7D776DF9302B3B08007EE0E8 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 7D776DF8302B3B08007EE0E8 /* RevenueCat */; };
 		7DE395323017AB4D00EE2527 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 7DE395313017AB4D00EE2527 /* SDWebImageSwiftUI */; };
 		7DEDC91B3017FC51004CDB98 /* DotLottie in Frameworks */ = {isa = PBXBuildFile; productRef = 7DEDC91A3017FC51004CDB98 /* DotLottie */; };
 		7DEDC91D3017FC51004CDB98 /* DotLottiePlayer in Frameworks */ = {isa = PBXBuildFile; productRef = 7DEDC91C3017FC51004CDB98 /* DotLottiePlayer */; };
@@ -66,8 +68,10 @@
 				7DEDC91D3017FC51004CDB98 /* DotLottiePlayer in Frameworks */,
 				7D72F8EA3028BFDD009A909E /* Auth in Frameworks */,
 				7DE395323017AB4D00EE2527 /* SDWebImageSwiftUI in Frameworks */,
+				7D776DF7302B3B08007EE0E8 /* ReceiptParser in Frameworks */,
 				7D72F8EE3028BFDD009A909E /* PostgREST in Frameworks */,
 				7D72F8EC3028BFDD009A909E /* Functions in Frameworks */,
+				7D776DF9302B3B08007EE0E8 /* RevenueCat in Frameworks */,
 				7DEDC91B3017FC51004CDB98 /* DotLottie in Frameworks */,
 				7D72F8F23028BFDD009A909E /* Storage in Frameworks */,
 				7DEDC9AC3018027D004CDB98 /* SwiftfulRouting in Frameworks */,
@@ -149,6 +153,8 @@
 				7D72F8EF3028BFDD009A909E /* Realtime */,
 				7D72F8F13028BFDD009A909E /* Storage */,
 				7D72F8F33028BFDD009A909E /* Supabase */,
+				7D776DF6302B3B08007EE0E8 /* ReceiptParser */,
+				7D776DF8302B3B08007EE0E8 /* RevenueCat */,
 			);
 			productName = Places;
 			productReference = 7DE3951830179C0B00EE2527 /* Places in East Africa.app */;
@@ -188,6 +194,7 @@
 				7DEDC9AA3018027D004CDB98 /* XCRemoteSwiftPackageReference "SwiftfulRouting" */,
 				7D1CF4433026FC280094EFD8 /* XCRemoteSwiftPackageReference "rive-ios" */,
 				7D72F8E83028BFDD009A909E /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				7D776DF5302B3B08007EE0E8 /* XCRemoteSwiftPackageReference "purchases-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7DE3951930179C0B00EE2527 /* Products */;
@@ -522,6 +529,16 @@
 				kind = upToNextMajorVersion;
 				minimumVersion = 2.5.1;
 			};
+			traits = (
+			);
+		};
+		7D776DF5302B3B08007EE0E8 /* XCRemoteSwiftPackageReference "purchases-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.83.1;
+			};
 		};
 		7DE395303017AB4C00EE2527 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -584,6 +601,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7D72F8E83028BFDD009A909E /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
+		};
+		7D776DF6302B3B08007EE0E8 /* ReceiptParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7D776DF5302B3B08007EE0E8 /* XCRemoteSwiftPackageReference "purchases-ios" */;
+			productName = ReceiptParser;
+		};
+		7D776DF8302B3B08007EE0E8 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7D776DF5302B3B08007EE0E8 /* XCRemoteSwiftPackageReference "purchases-ios" */;
+			productName = RevenueCat;
 		};
 		7DE395313017AB4D00EE2527 /* SDWebImageSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;

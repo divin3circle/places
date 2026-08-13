@@ -17,6 +17,8 @@ struct CreateTripForm: View {
 
     @AppStorage(AIPreferenceKey.model) private var aiModelRaw = ""
     @Query private var savedPlaces: [SavedPlace]
+    @Environment(PurchasesManager.self) private var purchases: PurchasesManager?
+    @Environment(TokenStore.self) private var tokens: TokenStore?
 
     var body: some View {
         VStack(spacing: 20) {
@@ -39,6 +41,8 @@ struct CreateTripForm: View {
                 ItineraryEngineFactory.prewarmOnDevice()
             }
         }
+        // Fresh balance so the Border Pass affordability check is accurate.
+        .task { await tokens?.refresh() }
     }
 
     private var progressBar: some View {
@@ -243,22 +247,56 @@ struct CreateTripForm: View {
     // MARK: Nav
 
     private var navButtons: some View {
-        HStack(spacing: 10) {
-            Button {
-                if vm.isFirstStep { onBackToPitch() } else { withAnimation(.snappy) { vm.back() } }
-            } label: {
-                Text("Back")
-            }
-            .buttonStyle(.appOutline)
-            .frame(maxWidth: 120)
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                Button {
+                    if vm.isFirstStep { onBackToPitch() } else { withAnimation(.snappy) { vm.back() } }
+                } label: {
+                    Text("Back")
+                }
+                .buttonStyle(.appOutline)
+                .frame(maxWidth: 120)
 
-            Button {
-                if vm.isLastStep { onFinish() } else { withAnimation(.snappy) { vm.next() } }
-            } label: {
-                Text(vm.isLastStep ? "Generate itinerary" : "Next")
+                Button {
+                    if vm.isLastStep { onFinish() } else { withAnimation(.snappy) { vm.next() } }
+                } label: {
+                    HStack(spacing: 6) {
+                        Text(vm.isLastStep ? "Generate itinerary" : "Next")
+                        if needsBorderPass {
+                            Label("\(FreeLimits.borderPassTokens)", systemImage: "centsign.circle.fill")
+                                .labelStyle(.titleAndIcon)
+                                .font(.system(size: 14, weight: .bold, design: .rounded))
+                        }
+                    }
+                }
+                .buttonStyle(vm.isLastStep ? AppButtonStyle(kind: .appAccent) : AppButtonStyle(kind: .appPrimary))
+                .disabled(needsBorderPass && !canAffordBorderPass)
             }
-            .buttonStyle(vm.isLastStep ? AppButtonStyle(kind: .appAccent) : AppButtonStyle(kind: .appPrimary))
+
+            if needsBorderPass {
+                Text(borderPassCallout)
+                    .font(.system(size: 12, design: .rounded))
+                    .foregroundStyle(canAffordBorderPass ? Color.secondary : Color.red)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+            }
         }
+    }
+
+    // MARK: Border Pass (free users pay to plan multi-country trips)
+
+    /// Free user on the final step with multi-country selected → a Border Pass applies.
+    private var needsBorderPass: Bool {
+        vm.isLastStep && vm.multipleCountries && !(purchases?.isPro ?? false)
+    }
+    private var canAffordBorderPass: Bool {
+        (tokens?.balance ?? 0) >= FreeLimits.borderPassTokens
+    }
+    private var borderPassCallout: String {
+        if canAffordBorderPass {
+            return "Multi-country trips use a \(FreeLimits.borderPassTokens)-token Border Pass. Go Pro for free multi-country planning."
+        }
+        return "You need \(FreeLimits.borderPassTokens) tokens for a Border Pass — you have \(tokens?.balance ?? 0). Top up or go Pro."
     }
 }
 

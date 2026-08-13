@@ -17,12 +17,18 @@ import class RiveRuntime.RiveViewModel
 struct GenerateItineraryView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(TokenStore.self) private var tokens: TokenStore?
+    @Environment(PurchasesManager.self) private var purchases: PurchasesManager?
     @Query private var savedPlaces: [SavedPlace]
+    @Query(sort: \SavedTrip.createdAt, order: .reverse) private var savedTrips: [SavedTrip]
     let config: TripConfig
 
     @State private var vm: ItineraryChatViewModel
     @State private var draft = ""
     @State private var showModelPicker = false
+    @State private var showPaywall = false
+    // Border Pass is charged once per trip. Resumed trips already paid at first generation.
+    @State private var borderPassCharged = false
     @State private var showSavedToast = false
     // Created once — never re-instantiate the Rive runtime on body re-renders.
     @State private var riveVM = RiveViewModel(fileName: "shapes")
@@ -41,6 +47,7 @@ struct GenerateItineraryView: View {
             travelers: 2, hasKids: false, expectation: "",
             multipleCountries: false, durationDays: 3, durationLabel: "")
         _vm = State(initialValue: ItineraryChatViewModel(resuming: trip))
+        _borderPassCharged = State(initialValue: true)
     }
 
     private let bottomAnchor = "chat-bottom"
@@ -100,6 +107,22 @@ struct GenerateItineraryView: View {
         .sheet(isPresented: $showModelPicker) {
             ModelPickerSheet(onDone: { startGeneration() })
         }
+        // Out of tokens → offer a top-up (user's coin shop). If a gate blocked
+        // generation (nothing on screen yet), dismissing returns to Home.
+        .sheet(isPresented: Binding(get: { vm.paymentRequired },
+                                    set: { vm.paymentRequired = $0 }),
+               onDismiss: { if vm.items.isEmpty { dismiss() } }) {
+            CoinShopView()
+        }
+        // Pro-only wall (e.g. hit the free saved-trips cap, or a Pro-only trip).
+        .sheet(isPresented: $showPaywall,
+               onDismiss: { if vm.items.isEmpty { dismiss() } }) {
+            PaywallView()
+        }
+        // Keep the Home-header balance honest after each generation (server debit).
+        .onChange(of: vm.isGenerating) { _, generating in
+            if !generating { Task { await tokens?.refresh() } }
+        }
         .overlay(alignment: .top) { saveToast }
         .onChange(of: vm.savedTripID) { _, newValue in
             guard newValue != nil else { return }
@@ -138,12 +161,38 @@ struct GenerateItineraryView: View {
     }
 
     private func convertToTrip() {
+        // Free users are capped; a NEW save beyond the limit shows the paywall.
+        if vm.savedTripID == nil, !(purchases?.isPro ?? false), savedTrips.count >= FreeLimits.savedTrips {
+            showPaywall = true
+            return
+        }
         Task { await vm.saveAsTrip(context: modelContext) }
     }
 
     private func startGeneration() {
+        Task { await startGenerationGated() }
+    }
+
+    /// Pro: reorder each day by proximity to cut backtracking (free → paywall).
+    private func optimizeDay() {
+        guard purchases?.isPro == true else { showPaywall = true; return }
+        vm.optimizeDays()
+    }
+
+    private func startGenerationGated() async {
         if config.useSavedPlaces {
             vm.preferredPlaceNames = savedPlaces.map(\.name)
+        }
+        // Longer trips are a Pro perk.
+        if !(purchases?.isPro ?? false), config.durationDays > FreeLimits.tripDays {
+            showPaywall = true
+            return
+        }
+        // Border Pass: multi-country is a Pro perk; free users pay once per trip.
+        if config.multipleCountries, !(purchases?.isPro ?? false), !borderPassCharged {
+            let paid = await tokens?.spend(FreeLimits.borderPassTokens, reason: "spend_border") ?? false
+            if !paid { vm.paymentRequired = true; return }   // insufficient → coin shop
+            borderPassCharged = true
         }
         let kind = AIModelKind(rawValue: aiModelRaw) ?? .onDevice
         vm.start(kind: kind)
@@ -240,6 +289,13 @@ struct GenerateItineraryView: View {
                           systemImage: vm.savedTripID != nil ? "checkmark.circle" : "suitcase.fill")
                 }
                 .disabled(!vm.canSave || vm.isSaving)
+
+                Button {
+                    optimizeDay()
+                } label: {
+                    Label("Optimize day", systemImage: "wand.and.stars")
+                }
+                .disabled(vm.isGenerating)
 
                 Button { } label: { Label("Pin", systemImage: "pin") }
                 Button { } label: { Label("Find in chat", systemImage: "magnifyingglass") }

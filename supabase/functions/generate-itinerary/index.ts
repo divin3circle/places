@@ -10,8 +10,12 @@
 // Secret:  supabase secrets set OPENAI_API_KEY=sk-...
 // Invoke:  requires the project's anon key in the `apikey` + `Authorization` headers.
 
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { costForAction } from "../_shared/cost.ts";
+
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
-const MODEL = "gpt-4o-mini";
+const MODEL = "gpt-4o-mini";      // free tier
+const PRO_MODEL = "gpt-4o";        // Pro tier — higher quality (higher COGS, capped by the token allotment)
 
 const ACTIVITY_KINDS = [
   "wildlife", "sightseeing", "foodAndDining", "lodging",
@@ -150,6 +154,15 @@ function userPrompt(body: ReqBody): string {
   ].join("\n");
 }
 
+// Refund the debited tokens when generation fails after the debit. Best-effort,
+// but log failures so a silently-shortchanged user is at least traceable.
+async function refundTokens(admin: any, userId: string, cost: number) {
+  const { error } = await admin.rpc("grant_tokens", {
+    p_user: userId, p_amount: cost, p_reason: "refund_error", p_ref: null,
+  });
+  if (error) console.error("refund_error grant failed", error);
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -167,8 +180,37 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Missing config or placeNames" }, 400);
   }
 
+  // --- Token debit (cloud generation) ---
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const admin = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+  const { data: userData, error: userErr } = await admin.auth.getUser(
+    authHeader.replace("Bearer ", ""),
+  );
+  if (userErr || !userData?.user) return json({ error: "Unauthorized" }, 401);
+  const userId = userData.user.id;
+
+  // Pro users get a higher-quality model; free users the standard one.
+  const { data: profileRow } = await admin.from("profiles").select("plan").eq("id", userId).single();
+  const chosenModel = profileRow?.plan === "pro" ? PRO_MODEL : MODEL;
+
+  const cost = costForAction(body.mode, "cloud");
+  const reason = body.mode === "refine" ? "spend_iter" : "spend_gen";
+  const { error: spendErr } = await admin.rpc("spend_tokens", {
+    p_user: userId, p_cost: cost, p_reason: reason, p_ref: null,
+  });
+  if (spendErr) {
+    // P0001 = insufficient_tokens raised by spend_tokens
+    if (spendErr.message?.includes("insufficient_tokens")) {
+      return json({ error: "insufficient_tokens" }, 402);
+    }
+    return json({ error: `Token debit failed: ${spendErr.message}` }, 500);
+  }
+
   const openaiBody = {
-    model: MODEL,
+    model: chosenModel,
     messages: [
       { role: "system", content: systemPrompt(body.config) },
       { role: "user", content: userPrompt(body) },
@@ -194,17 +236,26 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify(openaiBody),
     });
   } catch (e) {
+    await refundTokens(admin, userId, cost);
     return json({ error: `Upstream request failed: ${e}` }, 502);
   }
 
   if (!res.ok) {
     const text = await res.text();
+    await refundTokens(admin, userId, cost);
     return json({ error: `OpenAI error ${res.status}: ${text}` }, 502);
   }
 
-  const data = await res.json();
-  const content = data?.choices?.[0]?.message?.content;
+  let data: unknown;
+  try {
+    data = await res.json();
+  } catch {
+    await refundTokens(admin, userId, cost);
+    return json({ error: "OpenAI returned a malformed response" }, 502);
+  }
+  const content = (data as any)?.choices?.[0]?.message?.content;
   if (typeof content !== "string") {
+    await refundTokens(admin, userId, cost);
     return json({ error: "OpenAI returned no content" }, 502);
   }
 
@@ -212,6 +263,7 @@ Deno.serve(async (req: Request) => {
   try {
     itinerary = JSON.parse(content);
   } catch {
+    await refundTokens(admin, userId, cost);
     return json({ error: "OpenAI returned malformed JSON" }, 502);
   }
 

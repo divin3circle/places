@@ -20,6 +20,8 @@ struct ProfileSettingsList: View {
     @State private var showModelPicker = false
 
     @Environment(SessionStore.self) private var session: SessionStore?
+    @Environment(PurchasesManager.self) private var purchases: PurchasesManager?
+    @State private var showPaywall = false
 
     private let termsURL = URL(string: "https://places.app/terms")!
     private let privacyURL = URL(string: "https://places.app/privacy")!
@@ -36,6 +38,7 @@ struct ProfileSettingsList: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
 //            accountSection
+            proSection
             preferencesSection
             tripsSection
             supportSection
@@ -54,6 +57,27 @@ struct ProfileSettingsList: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .sheet(isPresented: $showModelPicker) {
             ModelPickerSheet()
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
+        }
+    }
+
+    private var proSection: some View {
+        SettingsSection {
+            SettingsRow(
+                icon: "crown.fill",
+                iconColor: .accent,
+                title: (purchases?.isPro == true) ? "Places Pro" : "Upgrade to Pro",
+                accessory: (purchases?.isPro == true) ? .badge(text: "Active", tint: .accent) : .chevron,
+                onTap: { showPaywall = true }
+            )
+            SettingsRow(
+                icon: "arrow.clockwise",
+                title: "Restore purchases",
+                accessory: .chevron,
+                onTap: { Task { await purchases?.restore() } }
+            )
         }
     }
 

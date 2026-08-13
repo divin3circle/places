@@ -16,6 +16,7 @@ struct ProfileHeader: View {
     @Binding var topInset: CGFloat
 
     @Environment(SessionStore.self) private var session: SessionStore?
+    @Environment(PurchasesManager.self) private var purchases: PurchasesManager?
 
     @State private var pickedItem: PhotosPickerItem?
     @State private var isUploading = false
@@ -23,6 +24,8 @@ struct ProfileHeader: View {
 
     private var displayName: String { session?.currentProfile?.name ?? "Traveler" }
     private var displayEmail: String { session?.currentProfile?.email ?? "" }
+    private var isPro: Bool { purchases?.isPro ?? false }
+    private var isLifetime: Bool { session?.currentProfile?.planProduct == "piea_pro_lifetime" }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -31,6 +34,12 @@ struct ProfileHeader: View {
                     .foregroundStyle(.clear)
                     .frame(width: 100, height: isLargerHeader ? 300 : 100)
                     .clipShape(.circle)
+                    .overlay {
+                        // Lifetime members get an animated gold avatar frame.
+                        if isLifetime {
+                            LifetimeFrameView(size: isLargerHeader ? 300 : 132)
+                        }
+                    }
                     .overlay {
                         if isUploading {
                             ZStack {
@@ -134,10 +143,13 @@ struct ProfileHeader: View {
     @ViewBuilder
     private func CustomNavigationBar() -> some View {
         VStack(alignment: .center, spacing: 6) {
-            Text(displayName)
-                .fontDesign(.rounded)
-                .font(.title)
-                .fontWeight(.semibold)
+            HStack(spacing: 8) {
+                Text(displayName)
+                    .fontDesign(.rounded)
+                    .font(.title)
+                    .fontWeight(.semibold)
+                if isPro { ProBadgeView(size: 26) }
+            }
 
             Text(displayEmail)
                 .foregroundStyle(.gray.opacity(0.9))

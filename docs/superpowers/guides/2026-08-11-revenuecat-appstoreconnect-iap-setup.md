@@ -20,14 +20,14 @@ The RevenueCat side is **provisioned**. You do NOT need to recreate any of this 
 
 | Product ID | Apple product type | Price (USD tier) | RC package |
 |---|---|---|---|
-| `pro_weekly` | Auto-renewable subscription | $1.49 | `$rc_weekly` |
-| `pro_monthly` | Auto-renewable subscription | $4.49 | `$rc_monthly` |
-| `pro_annual` | Auto-renewable subscription | $39.99 | `$rc_annual` |
-| `pro_lifetime` | Non-consumable | $89.99 | `$rc_lifetime` |
-| `tokens_25` | Consumable | $0.99 | `$rc_custom_tokens_25` |
-| `tokens_75` | Consumable | $1.99 | `$rc_custom_tokens_75` |
-| `tokens_200` | Consumable | $4.49 | `$rc_custom_tokens_200` |
-| `tokens_500` | Consumable | $9.99 | `$rc_custom_tokens_500` |
+| `piea_149_1w` | Auto-renewable subscription | $1.49 | `$rc_weekly` |
+| `piea_249_1m` | Auto-renewable subscription | $2.49 | `$rc_monthly` |
+| `piea_999_1y` | Auto-renewable subscription | $14.99 | `$rc_annual` |
+| `piea_pro_lifetime` | Non-consumable | $49.99 | `$rc_lifetime` |
+| `tokens_99_25` | Consumable | $0.99 | `$rc_custom_tokens_25` |
+| `token_199_75` | Consumable | $1.99 | `$rc_custom_tokens_75` |
+| `token_449_200` | Consumable | $4.49 | `$rc_custom_tokens_200` |
+| `token_999_500` | Consumable | $9.99 | `$rc_custom_tokens_500` |
 
 > Product IDs are **permanent** in App Store Connect — you can't rename or reuse them. Type them carefully.
 
@@ -49,21 +49,21 @@ App Store Connect → your app → **Monetization → Subscriptions**.
 
 1. **Create a Subscription Group** named `places_pro` (users can only hold one subscription from a group at a time — correct here, since Weekly/Monthly/Annual are mutually exclusive).
 2. Inside the group, **create three auto-renewable subscriptions** with these exact **Product IDs** and durations:
-   - `pro_weekly` — duration **1 Week** — Reference Name "Pro Weekly"
-   - `pro_monthly` — duration **1 Month** — "Pro Monthly"
-   - `pro_annual` — duration **1 Year** — "Pro Annual"
+   - `piea_149_1w` — duration **1 Week** — Reference Name "Pro Weekly"
+   - `piea_249_1m` — duration **1 Month** — "Pro Monthly"
+   - `piea_999_1y` — duration **1 Year** — "Pro Annual"
 3. For each: set **price** (choose the USD tier from the table; Apple auto-generates KES and every other storefront), add a **localized display name + description** (English at minimum), and a **subscription-group display name**.
 4. Each subscription needs a **review screenshot** of the paywall (add once the app UI exists — see Step 8) and passes review the first time **alongside the app version**.
 
 ## Step 3 — Create the non-consumable (Lifetime)
 
 Monetization → **In-App Purchases → +** → **Non-Consumable**:
-- Product ID `pro_lifetime`, Reference Name "Pro Lifetime", price tier **$89.99**, localized name/description, review screenshot.
+- Product ID `piea_pro_lifetime`, Reference Name "Pro Lifetime", price tier **$49.99**, localized name/description, review screenshot.
 
 ## Step 4 — Create the 4 consumables (token packs)
 
 Monetization → **In-App Purchases → +** → **Consumable** (×4):
-- `tokens_25` ($0.99), `tokens_75` ($1.99), `tokens_200` ($4.49), `tokens_500` ($9.99), each with reference name, price tier, localized name/description, review screenshot.
+- `tokens_99_25` ($0.99), `token_199_75` ($1.99), `token_449_200` ($4.49), `token_999_500` ($9.99), each with reference name, price tier, localized name/description, review screenshot.
 
 ## Step 5 — Generate the credentials RevenueCat needs
 
@@ -127,11 +127,11 @@ This is the part people miss: **first-time IAPs are reviewed together with an ap
 
 | On purchase/renewal of | TOK granted | Expires at cycle end? |
 |---|---|---|
-| `pro_weekly` | 50 | yes |
-| `pro_monthly` | 500 | yes |
-| `pro_annual` | 6,000 (a year of 500/mo, up front) | yes |
-| `pro_lifetime` | — (granted 1,000/mo by a Supabase cron; see spec §6) | n/a |
-| `tokens_25/75/200/500` | 25/75/200/500 | **never** |
+| `piea_149_1w` | 50 | yes |
+| `piea_249_1m` | 500 | yes |
+| `piea_999_1y` | 6,000 (a year of 500/mo, up front) | yes |
+| `piea_pro_lifetime` | — (granted 1,000/mo by a Supabase cron; see spec §6) | n/a |
+| `tokens_99_25 / token_199_75 / token_449_200 / token_999_500` | 25/75/200/500 | **never** |
 
 ## Outstanding (not automatable via API — you must do in the dashboards)
 
