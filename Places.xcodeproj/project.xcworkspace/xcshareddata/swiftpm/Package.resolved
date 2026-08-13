@@ -1,5 +1,5 @@
 {
-  "originHash" : "f1db18dd86acc6461384e6308360aa1f007486ecf3d6b9e3171c5f80b88ae5a1",
+  "originHash" : "d92ccce9b410c3c803ef7c28355c47162f161453e70c5c0f1fa91027d21750c9",
   "pins" : [
     {
       "identity" : "dotlottie-ios",
@@ -8,6 +8,15 @@
       "state" : {
         "branch" : "main",
         "revision" : "3940beca42e273bc813fd002d1ddc59ff5dd4e76"
+      }
+    },
+    {
+      "identity" : "purchases-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/RevenueCat/purchases-ios",
+      "state" : {
+        "revision" : "3d036d836a93872895f84065fabe580c3f2e2a23",
+        "version" : "5.83.1"
       }
     },
     {
