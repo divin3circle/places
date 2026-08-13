@@ -2,7 +2,7 @@
 
 Need help or found a bug? We'd love to hear from you.
 
-**Email us:** **[support email]**
+**Email us:** **sylusabel1@gmail.com**
 _When reporting a bug, tell us your device model, iOS version, and what you were doing — a screenshot helps a lot._
 
 ## Frequently asked
@@ -23,7 +23,7 @@ Subscriptions are managed by Apple: **Settings → [your name] → Subscriptions
 Purchases are handled by Apple. Request refunds via **reportaproblem.apple.com**. Consumable tokens are non-refundable once granted.
 
 **How do I delete my account?**
-Email us at **[support email]** and we'll remove your account and associated data.
+Email us at **sylusabel1@gmail.com** and we'll remove your account and associated data.
 
 ---
 See also: [Privacy Policy](/privacy) · [Terms of Service](/terms)

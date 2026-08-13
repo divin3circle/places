@@ -46,4 +46,4 @@ These Terms are governed by the laws of **Kenya**, without regard to conflict-of
 
 ## Contact
 
-**[Your Company / Developer Name]**, **[support email]**.
+**[Your Company / Developer Name]**, **sylusabel1@gmail.com**.

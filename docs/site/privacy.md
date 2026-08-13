@@ -33,7 +33,7 @@ We do not sell your personal information.
 
 ## Data retention & deletion
 
-We keep account data while your account is active. You can request deletion of your account and associated data by contacting us at **[support email]**; we will delete it except where we must retain records for legal or financial reasons.
+We keep account data while your account is active. You can request deletion of your account and associated data by contacting us at **sylusabel1@gmail.com**; we will delete it except where we must retain records for legal or financial reasons.
 
 ## Children
 
@@ -41,7 +41,7 @@ The App is not directed to children under 13 (or the equivalent minimum age in y
 
 ## Your rights
 
-Depending on your location, you may have rights to access, correct, or delete your data. Contact us at **[support email]** to exercise them.
+Depending on your location, you may have rights to access, correct, or delete your data. Contact us at **sylusabel1@gmail.com** to exercise them.
 
 ## Changes
 
@@ -49,4 +49,4 @@ We may update this policy; material changes will be posted here with a new date.
 
 ## Contact
 
-**[Your Company / Developer Name]**, **[support email]**, **[domain]**.
+**[Your Company / Developer Name]**, **sylusabel1@gmail.com**, **[domain]**.

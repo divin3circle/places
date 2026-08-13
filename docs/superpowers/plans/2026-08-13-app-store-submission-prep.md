@@ -90,10 +90,17 @@ Entitlement `pro`. Products (RevenueCat ↔ ASC):
 **Reviewer notes draft:**
 > Places in East Africa is an AI travel-itinerary planner. Sign in with Apple is required. A demo account is provided below.
 > Free users get a starter token balance and can generate itineraries (tokens are spent server-side per generation). "Places Pro" (auto-renewable weekly/monthly/annual, or a one-time Lifetime) unlocks unlimited multi-country planning, PDF export, day optimization, and a monthly token grant. Token packs are consumables that add to the balance.
-> To test purchases, use a Sandbox Apple Account (Settings → App Store → Sandbox). Purchases credit tokens / unlock Pro via a RevenueCat webhook to our backend.
-> Demo account: **[Apple ID email]** / **[password]** (or: any Apple ID via Sign in with Apple works).
+> Login: **Sign in with Apple is required. Please use your own Apple ID — no demo account is needed.**
+> To test purchases, the sandbox environment is used automatically. Purchases credit tokens / unlock Pro via a RevenueCat webhook to our backend.
+> The weekly subscription includes a 3-day free trial for new subscribers.
 
-- [ ] Provide the demo Apple ID credentials (Sign in with Apple can be finicky in review — consider a note that reviewers may use their own Apple ID).
+- [ ] No demo account required — reviewers use their own Apple ID via SIWA (leave demo-account fields blank; keep the note above).
+- [ ] Support email: **sylusabel1@gmail.com** (Marketing/support URL from the site).
+
+## 7. Free trial — 3-day on weekly (`piea_149_1w`)  (task: new)
+- [ ] ASC → Subscriptions → `places_pro` → weekly → **Introductory Offer → Free, 3 days, All territories, new subscribers**.
+- [ ] RevenueCat: no change (reads the intro offer from StoreKit automatically).
+- [ ] App copy: paywall CTA → "Start 3-day free trial" when weekly (trial-eligible) is selected; fix the stale pitch line "14 days free, then $0.99/month".
 
 ---
 
