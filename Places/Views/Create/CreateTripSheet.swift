@@ -50,8 +50,10 @@ struct CreateTripSheet: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color(.systemBackground))
-        .presentationDetents([.height(360), .large], selection: $detent)
-        .presentationDragIndicator(.visible)
+        // Pitch is a compact sheet; once planning starts we lock to full height
+        // (no minimize) so the wizard isn't cramped.
+        .presentationDetents(isPlanning ? [.large] : [.height(360)], selection: $detent)
+        .presentationDragIndicator(isPlanning ? .hidden : .visible)
         .presentationBackground(Color(.systemBackground))
     }
 

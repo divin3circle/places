@@ -111,8 +111,11 @@ struct CreateTripForm: View {
                             }
                         }
                     }
+                    .padding(.horizontal, 20)
                 }
                 .scrollIndicators(.hidden)
+                // Bleed past the form's 20pt padding so pills run edge-to-edge.
+                .padding(.horizontal, -20)
 
                 if vm.durationPreset == .custom {
                     stepper(value: vm.customDays, unit: vm.customDays == 1 ? "day" : "days",
@@ -125,7 +128,7 @@ struct CreateTripForm: View {
 
     private var preferencesStep: some View {
         stepScaffold(icon: "slider.horizontal.3", title: "A few preferences", subtitle: "Fine-tune the plan.") {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 34) {
                 HStack(spacing: 12) {
                     Image(systemName: "calendar")
                         .font(.system(size: 16, weight: .semibold))
@@ -189,11 +192,20 @@ struct CreateTripForm: View {
                 }
             }
             .microAnimations(delay: 0.12, slideDirection: .Bottom, offsetAmount: 16)
-            
-            Spacer()
 
-            content()
-                .microAnimations(delay: 0.22, slideDirection: .Bottom, offsetAmount: 20)
+            if vm.isLastStep {
+                // Content-dense final step — no animation; content flows from here.
+                content()
+                    .microAnimations(delay: 0.22, slideDirection: .Bottom, offsetAmount: 20)
+            } else {
+                // Fill the roomy full-height sheet with the reused trip animation.
+                CreateTripView(symbolFont: .title, tint: .primary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 180)
+                    .microAnimations(delay: 0.18, slideDirection: .Bottom, offsetAmount: 16)
+                content()
+                    .microAnimations(delay: 0.28, slideDirection: .Bottom, offsetAmount: 20)
+            }
 
             Spacer(minLength: 0)
         }
