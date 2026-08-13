@@ -22,10 +22,10 @@ struct ProfileHeader: View {
     @Environment(PurchasesManager.self) private var purchases: PurchasesManager?
 
     // Stub links until the marketing site's pages are live (see task: site update).
-    private let supportURL = URL(string: "https://places.app/support")!
-    private let contactURL = URL(string: "https://places.app/contact")!
-    private let privacyURL = URL(string: "https://places.app/privacy")!
-    private let termsURL = URL(string: "https://places.app/terms")!
+    private let supportURL = URL(string: "https://places-web.vercel.app/support")!
+    private let contactURL = URL(string: "mailto:sylusabel1@gmail.com")!
+    private let privacyURL = URL(string: "https://places-web.vercel.app/privacy")!
+    private let termsURL = URL(string: "https://places-web.vercel.app/terms")!
 
     @State private var pickedItem: PhotosPickerItem?
     @State private var isUploading = false

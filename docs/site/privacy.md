@@ -49,4 +49,4 @@ We may update this policy; material changes will be posted here with a new date.
 
 ## Contact
 
-**Sylus Abel**, **sylusabel1@gmail.com**, **[domain]**.
+**Sylus Abel**, **sylusabel1@gmail.com**, **https://places-web.vercel.app**.

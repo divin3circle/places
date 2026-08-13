@@ -23,10 +23,10 @@ struct ProfileSettingsList: View {
     @Environment(PurchasesManager.self) private var purchases: PurchasesManager?
     @State private var showPaywall = false
 
-    private let termsURL = URL(string: "https://places.app/terms")!
-    private let privacyURL = URL(string: "https://places.app/privacy")!
-    private let faqURL = URL(string: "https://places.app/faq")!
-    private let feedbackURL = URL(string: "mailto:support@places.app?subject=Places%20Feedback")!
+    private let termsURL = URL(string: "https://places-web.vercel.app/terms")!
+    private let privacyURL = URL(string: "https://places-web.vercel.app/privacy")!
+    private let faqURL = URL(string: "https://places-web.vercel.app/support")!
+    private let feedbackURL = URL(string: "mailto:sylusabel1@gmail.com?subject=Places%20Feedback")!
 
     private var appearance: Binding<AppearanceMode> {
         Binding(

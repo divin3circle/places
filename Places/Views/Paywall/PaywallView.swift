@@ -195,10 +195,9 @@ struct PaywallView: View {
                 Button("Buy tokens instead") { showCoins = true }
                     .foregroundStyle(.accent)
                 Text("·").foregroundStyle(.secondary)
-                // TODO: swap in your real Terms / Privacy URLs before submission.
-                Link("Terms", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+                Link("Terms", destination: URL(string: "https://places-web.vercel.app/terms")!)
                     .foregroundStyle(.secondary)
-                Link("Privacy", destination: URL(string: "https://places.app/privacy")!)
+                Link("Privacy", destination: URL(string: "https://places-web.vercel.app/privacy")!)
                     .foregroundStyle(.secondary)
             }
             .font(.system(size: 12, design: .rounded))
