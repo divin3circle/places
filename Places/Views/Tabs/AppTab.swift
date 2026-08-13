@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct AppTab: View {
+    @Environment(Connectivity.self) private var connectivity: Connectivity?
     @State private var activeTab: AppTabs = .home
     @State private var progress: CGFloat = 0
     @State private var showCreate: Bool = false
@@ -89,6 +90,12 @@ struct AppTab: View {
                     .transition(.opacity)
             }
         }
+        .overlay(alignment: .top) {
+            if connectivity?.isOnline == false {
+                OfflineBanner()
+            }
+        }
+        .animation(.snappy, value: connectivity?.isOnline)
         .environment(sponsoredViewModel)
         .sheet(isPresented: $showCreate, onDismiss: {
             if let pendingConfig {

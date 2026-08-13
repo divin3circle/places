@@ -21,7 +21,13 @@ final class SessionStore {
     private let avatars: AvatarStoring
     private let defaults: UserDefaults
     private let mirrorKey = "onboarding_complete_mirror"
+    private let profileCacheKey = "cached_profile_json"
     private var userID: UUID?
+
+    /// Max time to wait for the persisted session to restore before falling back
+    /// to local state. Prevents a hung token refresh (offline) from freezing the
+    /// launch on the splash screen.
+    private let restoreTimeout: Duration = .seconds(4)
 
     init(auth: AuthProviding, profiles: ProfileProviding, avatars: AvatarStoring, defaults: UserDefaults = .standard) {
         self.auth = auth
@@ -40,11 +46,50 @@ final class SessionStore {
     }
 
     func bootstrap() async {
-        do {
-            guard let id = try await auth.restoreSession() else { phase = .signedOut; return }
+        // Restore the persisted session, but never let a hung network refresh
+        // (offline) freeze the launch on the splash screen. Race the restore
+        // against a timeout; on timeout fall back to cached local state.
+        switch await restoreSessionWithTimeout() {
+        case .restored(let id):
             userID = id
             await loadProfileAndSetPhase(id: id)
-        } catch {
+        case .noSession:
+            phase = .signedOut
+        case .timedOut:
+            enterOfflineFallback()
+        }
+    }
+
+    private enum RestoreOutcome { case restored(UUID), noSession, timedOut }
+
+    private func restoreSessionWithTimeout() async -> RestoreOutcome {
+        await withTaskGroup(of: RestoreOutcome?.self) { group in
+            group.addTask { [auth] in
+                do {
+                    if let id = try await auth.restoreSession() { return .restored(id) }
+                    return .noSession
+                } catch { return .noSession }
+            }
+            group.addTask { [restoreTimeout] in
+                try? await Task.sleep(for: restoreTimeout)
+                return .timedOut
+            }
+            let outcome = await group.next() ?? .timedOut
+            group.cancelAll()
+            return outcome ?? .timedOut
+        }
+    }
+
+    /// Offline (or auth backend unreachable): enter the app with cached state if
+    /// we know the user was signed in and onboarded, otherwise show sign-in.
+    private func enterOfflineFallback() {
+        if let cached = cachedProfile() {
+            currentProfile = cached
+            userID = cached.id
+            phase = cached.onboardingComplete ? .ready : .onboarding
+        } else if defaults.bool(forKey: mirrorKey) {
+            phase = .ready
+        } else {
             phase = .signedOut
         }
     }
@@ -95,11 +140,27 @@ final class SessionStore {
         do {
             let profile = try await profiles.fetch(id: id)
             currentProfile = profile
+            cacheProfile(profile)
             defaults.set(profile.onboardingComplete, forKey: mirrorKey)
             phase = profile.onboardingComplete ? .ready : .onboarding
         } catch {
-            // Offline / fetch failure with a valid session: fall back to the local mirror.
+            // Offline / fetch failure with a valid session: keep the user moving
+            // with the last-cached profile + onboarding mirror.
+            if let cached = cachedProfile(), cached.id == id { currentProfile = cached }
             phase = defaults.bool(forKey: mirrorKey) ? .ready : .onboarding
         }
+    }
+
+    // MARK: Offline profile cache
+
+    private func cacheProfile(_ profile: Profile) {
+        if let data = try? JSONEncoder().encode(profile) {
+            defaults.set(data, forKey: profileCacheKey)
+        }
+    }
+
+    private func cachedProfile() -> Profile? {
+        guard let data = defaults.data(forKey: profileCacheKey) else { return nil }
+        return try? JSONDecoder().decode(Profile.self, from: data)
     }
 }

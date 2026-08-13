@@ -1,7 +1,7 @@
 import Foundation
 @testable import Places
 
-final class FakeAuthProviding: AuthProviding {
+final class FakeAuthProviding: AuthProviding, @unchecked Sendable {
     var restoreID: UUID?
     var signInID = UUID()
 

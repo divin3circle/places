@@ -8,7 +8,7 @@
 import Foundation
 import Supabase
 
-protocol AuthProviding {
+protocol AuthProviding: Sendable {
     /// Restores a persisted session (Keychain, offline-capable). Returns the user id, or nil.
     func restoreSession() async throws -> UUID?
     /// Exchanges an Apple identity token for a Supabase session. Returns the user id.
