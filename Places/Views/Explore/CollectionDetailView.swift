@@ -23,44 +23,57 @@ struct CollectionDetailView: View {
     }
 
     var body: some View {
-        ScrollView(.vertical) {
-            VStack(alignment: .leading, spacing: 18) {
-                header
-                switch content?.popularDestinations ?? .idle {
-                case .idle, .loading:
-                    skeleton
-                case .loaded:
-                    if matches.isEmpty {
-                        ContentEmptyState(icon: collection.systemImage,
-                                          message: "Nothing in this collection yet.")
-                            .padding(.horizontal, 15)
-                    } else {
-                        LazyVStack(spacing: 18) {
-                            ForEach(matches) { dto in
-                                Button { pushDestination(dto) } label: {
-                                    CollectionDestinationRow(destination: dto)
-                                }
-                                .buttonStyle(PressableButtonStyle())
-                            }
-                        }
-                        .padding(.horizontal, 15)
-                    }
-                case .failed(let message):
-                    Text(message)
-                        .font(.system(.footnote, design: .rounded))
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 40)
-                }
-            }
-            .padding(.bottom, 40)
+        DestinationFullView(
+            minimumHeight: 92,
+            maximumHeight: 240,
+            ignoresSafeAreaTop: true,
+            isSticky: true
+        ) { progress, safeArea in
+            header(progress: progress, safeArea: safeArea)
+        } content: {
+            destinationList
         }
-        .scrollIndicators(.hidden)
+        .background(Color(.systemBackground))
         .toolbar(.hidden, for: .navigationBar)
         .task { await content?.loadPopularDestinations() }
     }
 
-    private var header: some View {
+    private var destinationList: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            switch content?.popularDestinations ?? .idle {
+            case .idle, .loading:
+                skeleton
+            case .loaded:
+                if matches.isEmpty {
+                    ContentEmptyState(icon: collection.systemImage,
+                                      message: "Nothing in this collection yet.")
+                        .padding(.horizontal, 15)
+                } else {
+                    LazyVStack(spacing: 18) {
+                        ForEach(matches) { dto in
+                            Button { pushDestination(dto) } label: {
+                                CollectionDestinationRow(destination: dto)
+                            }
+                            .buttonStyle(PressableButtonStyle())
+                        }
+                    }
+                    .padding(.horizontal, 15)
+                }
+            case .failed(let message):
+                Text(message)
+                    .font(.system(.footnote, design: .rounded))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 40)
+            }
+        }
+        .padding(.top, 18)
+        .padding(.bottom, 40)
+    }
+
+    // Themed gradient hero that ignores the top safe area and stretches on
+    // pull-down (via DestinationFullView); title fades as it collapses.
+    private func header(progress: CGFloat, safeArea: EdgeInsets) -> some View {
         ZStack(alignment: .bottomLeading) {
             LinearGradient(colors: collection.gradient,
                            startPoint: .topTrailing, endPoint: .bottomLeading)
@@ -78,11 +91,16 @@ struct CollectionDetailView: View {
                     .foregroundStyle(.white.opacity(0.9))
             }
             .padding(20)
+            .opacity(1 - min(progress * 1.4, 1))
+
+            HStack {
+                backButton
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, safeArea.top + 8)
+            .frame(maxHeight: .infinity, alignment: .top)
         }
-        .frame(height: 220)
-        .clipShape(.rect(cornerRadius: 0))
-        .overlay(alignment: .topLeading) { backButton }
-        .ignoresSafeArea(edges: .top)
     }
 
     private var backButton: some View {
@@ -94,8 +112,6 @@ struct CollectionDetailView: View {
                 .background(.ultraThinMaterial, in: .circle)
         }
         .buttonStyle(PressableButtonStyle())
-        .padding(.leading, 12)
-        .padding(.top, 8)
     }
 
     private var skeleton: some View {
