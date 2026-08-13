@@ -50,7 +50,6 @@ nonisolated struct Experience: Identifiable, Hashable {
     }
 }
 
-#if DEBUG
 extension Experience {
     /// Preview-only fixture (Xcode canvases). Not used at runtime.
     static let preview = Experience(
@@ -65,4 +64,3 @@ extension Experience {
         description: "Explore the world's only wildlife park within a capital city."
     )
 }
-#endif

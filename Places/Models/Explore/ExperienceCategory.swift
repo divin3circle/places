@@ -18,11 +18,9 @@ nonisolated struct ExperienceCategory: Identifiable, Hashable {
     var id: String { tag }
 }
 
-#if DEBUG
 extension ExperienceCategory {
     /// Preview-only fixture. Not used at runtime.
     static let preview = ExperienceCategory(
         label: "Wildlife safaris", imageName: "onboarding1", tag: "wildlife_safaris"
     )
 }
-#endif

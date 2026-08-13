@@ -18,7 +18,6 @@ struct Trip: Identifiable {
   var subtitle: String = ""
 }
 
-#if DEBUG
 extension Trip {
   /// Preview-only fixtures. Not used by any shipping screen.
   static let previews: [Trip] = [
@@ -30,4 +29,3 @@ extension Trip {
           subtitle: "4 days · Kilimanjaro views"),
   ]
 }
-#endif
