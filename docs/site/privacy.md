@@ -2,7 +2,7 @@
 
 _Last updated: August 13, 2026_
 
-This Privacy Policy explains how **[Your Company / Developer Name]** ("we", "us") handles information in the **Places in East Africa** app (the "App"). By using the App you agree to this policy.
+This Privacy Policy explains how **Sylus Abel** ("we", "us") handles information in the **Places in East Africa** app (the "App"). By using the App you agree to this policy.
 
 ## Information we collect
 
@@ -49,4 +49,4 @@ We may update this policy; material changes will be posted here with a new date.
 
 ## Contact
 
-**[Your Company / Developer Name]**, **sylusabel1@gmail.com**, **[domain]**.
+**Sylus Abel**, **sylusabel1@gmail.com**, **[domain]**.

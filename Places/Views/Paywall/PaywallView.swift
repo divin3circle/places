@@ -153,6 +153,11 @@ struct PaywallView: View {
                     Text("\(plan.monthlyTokens) tokens / month")
                         .font(.system(size: 13, design: .rounded))
                         .foregroundStyle(.secondary)
+                    if let trial = plan.trialLabel {
+                        Text(trial)
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.green)
+                    }
                 }
                 Spacer(minLength: 0)
                 VStack(alignment: .trailing, spacing: 1) {
@@ -207,6 +212,7 @@ struct PaywallView: View {
     private var ctaTitle: String {
         guard let id = selectedId,
               let plan = purchases?.subscriptions.first(where: { $0.id == id }) else { return "Continue" }
+        if let trial = plan.trialLabel { return "Start \(trial)" }
         return plan.id == "$rc_lifetime" ? "Unlock Lifetime" : "Start \(plan.title)"
     }
 

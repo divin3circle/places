@@ -76,7 +76,7 @@ struct CreateTripSheet: View {
             .padding(.bottom)
 
             VStack(spacing: 10) {
-                Text("14 days free, then $0.99 / month")
+                Text("Start with free tokens — go Pro anytime")
                     .font(.system(size: 12, design: .rounded))
                     .foregroundStyle(.secondary)
 

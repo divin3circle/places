@@ -17,6 +17,7 @@ nonisolated struct SubOption: Identifiable, Hashable {
     let periodLabel: String   // "/week", "/year", "one-time"
     let monthlyTokens: Int    // tokens granted per month (50 / 500 / 500 / 1000)
     let isBestValue: Bool
+    var trialLabel: String? = nil   // e.g. "3-day free trial" when an intro offer applies
 }
 
 /// A consumable token pack on the coin shop.

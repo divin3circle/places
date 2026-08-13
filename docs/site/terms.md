@@ -2,7 +2,7 @@
 
 _Last updated: August 13, 2026_
 
-These Terms govern your use of the **Places in East Africa** app (the "App") provided by **[Your Company / Developer Name]**. By using the App you agree to these Terms.
+These Terms govern your use of the **Places in East Africa** app (the "App") provided by **Sylus Abel**. By using the App you agree to these Terms.
 
 ## Accounts
 
@@ -46,4 +46,4 @@ These Terms are governed by the laws of **Kenya**, without regard to conflict-of
 
 ## Contact
 
-**[Your Company / Developer Name]**, **sylusabel1@gmail.com**.
+**Sylus Abel**, **sylusabel1@gmail.com**.
