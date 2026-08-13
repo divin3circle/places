@@ -93,12 +93,15 @@ struct ProfileSettingsList: View {
 
     private var accountActionsSection: some View {
         SettingsSection {
+            #if DEBUG
+            // Debug-only: never ship the onboarding reset to real users.
             SettingsRow(
                 icon: "arrow.counterclockwise",
                 title: "Reset onboarding (debug)",
                 accessory: .chevron,
                 onTap: resetOnboarding
             )
+            #endif
             SettingsRow(
                 icon: "rectangle.portrait.and.arrow.forward",
                 title: "Log out",

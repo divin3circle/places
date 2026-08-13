@@ -151,6 +151,7 @@ struct CreateTripForm: View {
                         choicePill("KSh", selected: vm.currency == .kes) { withAnimation(.snappy) { vm.currency = .kes } }
                     }
                 }
+                Spacer()
 
                 if !savedPlaces.isEmpty {
                     Toggle(isOn: $vm.useSavedPlaces) {
@@ -199,10 +200,9 @@ struct CreateTripForm: View {
                     .microAnimations(delay: 0.22, slideDirection: .Bottom, offsetAmount: 20)
             } else {
                 // Fill the roomy full-height sheet with the reused trip animation.
-                CreateTripView(symbolFont: .title, tint: .primary)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 180)
+                LottieAnimationLoader(fileName: resolveLottieAnimation(icon), loop: true, loopCount: 2, autoPlay: true, )
                     .microAnimations(delay: 0.18, slideDirection: .Bottom, offsetAmount: 16)
+                Spacer()
                 content()
                     .microAnimations(delay: 0.28, slideDirection: .Bottom, offsetAmount: 20)
             }
@@ -210,6 +210,20 @@ struct CreateTripForm: View {
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private func resolveLottieAnimation(_ icon: String) -> String {
+        if icon == "person.2.fill" {
+            return "travel"
+        } else if icon == "figure.and.child.holdinghands" {
+            return "onboarding-animation"
+        } else if icon == "sparkles" {
+            return "generate"
+        } else if icon == "globe.americas.fill" {
+            return "feature-animation1"
+        } else {
+            return "travel"
+        }
     }
 
     private func stepper(value: Int, unit: String, onMinus: @escaping () -> Void, onPlus: @escaping () -> Void) -> some View {
