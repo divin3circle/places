@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AppTab: View {
     @Environment(Connectivity.self) private var connectivity: Connectivity?
+    @Environment(SessionStore.self) private var session: SessionStore?
     @State private var activeTab: AppTabs = .home
     @State private var progress: CGFloat = 0
     @State private var showCreate: Bool = false
@@ -97,6 +98,11 @@ struct AppTab: View {
             }
         }
         .animation(.snappy, value: connectivity?.isOnline)
+        // Self-heal a stale/synthesized profile (e.g. default avatar) whenever the
+        // app surfaces or connectivity returns — no logout/login needed.
+        .task(id: connectivity?.isOnline) {
+            if connectivity?.isOnline != false { await session?.refreshProfile() }
+        }
         .environment(sponsoredViewModel)
         .sheet(isPresented: $showCreate, onDismiss: {
             if let pendingConfig {

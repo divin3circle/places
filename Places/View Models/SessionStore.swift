@@ -54,9 +54,18 @@ final class SessionStore {
             userID = id
             await loadProfileAndSetPhase(id: id)
         case .noSession:
-            phase = .signedOut
+            signedOutState()
         case .timedOut:
-            enterOfflineFallback()
+            // Slow/hung restore. Only enter the app if we have cached evidence of a
+            // signed-in user (never a userless .ready); reconcile once the net resolves.
+            if let cached = cachedProfile() {
+                userID = cached.id
+                currentProfile = cached
+                phase = cached.onboardingComplete ? .ready : .onboarding
+                Task { await reconcileSessionInBackground() }
+            } else {
+                signedOutState()
+            }
         }
     }
 
@@ -80,18 +89,26 @@ final class SessionStore {
         }
     }
 
-    /// Offline (or auth backend unreachable): enter the app with cached state if
-    /// we know the user was signed in and onboarded, otherwise show sign-in.
-    private func enterOfflineFallback() {
-        if let cached = cachedProfile() {
-            currentProfile = cached
-            userID = cached.id
-            phase = cached.onboardingComplete ? .ready : .onboarding
-        } else if defaults.bool(forKey: mirrorKey) {
-            phase = .ready
-        } else {
-            phase = .signedOut
-        }
+    private func signedOutState() {
+        userID = nil
+        currentProfile = nil
+        phase = .signedOut
+    }
+
+    /// After a timed-out launch, confirm the session (no timeout now) and refresh
+    /// the profile so a stale/cached avatar self-heals without a re-login. Never
+    /// signs the user out on a nil result — that could be a transient offline read.
+    private func reconcileSessionInBackground() async {
+        guard let id = try? await auth.restoreSession() else { return }
+        userID = id
+        await loadProfileAndSetPhase(id: id)
+    }
+
+    /// Re-fetch the current profile (call when connectivity returns or the app
+    /// foregrounds) so a stale or synthesized profile picks up the real name/avatar.
+    func refreshProfile() async {
+        guard let id = userID else { return }
+        await loadProfileAndSetPhase(id: id)
     }
 
     func signIn(idToken: String, rawNonce: String, appleFullName: PersonNameComponents?) async throws {
@@ -132,6 +149,7 @@ final class SessionStore {
         try? await auth.signOut()
         userID = nil
         defaults.set(false, forKey: mirrorKey)
+        defaults.removeObject(forKey: profileCacheKey)   // don't offline-restore a signed-out user
         currentProfile = nil
         phase = .signedOut
     }
@@ -144,9 +162,18 @@ final class SessionStore {
             defaults.set(profile.onboardingComplete, forKey: mirrorKey)
             phase = profile.onboardingComplete ? .ready : .onboarding
         } catch {
-            // Offline / fetch failure with a valid session: keep the user moving
-            // with the last-cached profile + onboarding mirror.
-            if let cached = cachedProfile(), cached.id == id { currentProfile = cached }
+            // Offline / fetch failure with a valid session: keep the user moving.
+            // Prefer the cached profile; otherwise synthesize a minimal one so the
+            // app always has a valid user id (plans won't load without it) — the
+            // real name/avatar fill in on the next successful refresh.
+            if let cached = cachedProfile(), cached.id == id {
+                currentProfile = cached
+            } else if currentProfile?.id != id {
+                currentProfile = Profile(id: id, name: nil, email: nil, avatarURL: nil,
+                                         interests: [], plan: "free",
+                                         onboardingComplete: defaults.bool(forKey: mirrorKey),
+                                         planProduct: nil, proExpiresAt: nil)
+            }
             phase = defaults.bool(forKey: mirrorKey) ? .ready : .onboarding
         }
     }
