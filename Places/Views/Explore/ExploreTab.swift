@@ -82,9 +82,12 @@ struct ExploreTab: View {
                             .buttonStyle(PressableButtonStyle())
                     }
                 }
+                .padding(.horizontal, 15)
                 .padding(.vertical, 2)
             }
             .scrollIndicators(.hidden)
+            // Bleed past the parent's 15pt padding so pills run edge-to-edge.
+            .padding(.horizontal, -15)
         }
     }
 
