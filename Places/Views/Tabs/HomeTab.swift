@@ -11,6 +11,8 @@ import SwiftData
 
 struct HomeTab: View {
     let sponsoredAnimation: Namespace.ID
+    /// Lets section "View all" buttons switch the root tab (Explore / Trips).
+    var onSwitchTab: (AppTabs) -> Void = { _ in }
 
     @Environment(\.router) private var router
     @Environment(ContentStore.self) private var content: ContentStore?
@@ -71,7 +73,7 @@ struct HomeTab: View {
 
     private var myTripsSection: some View {
         VStack(spacing: 8) {
-            SectionHeader(title: "My Trips", hasButton: true, action: {})
+            SectionHeader(title: "My Trips", hasButton: true, action: { onSwitchTab(.trips) })
             if savedTrips.isEmpty {
                 ContentEmptyState(icon: "suitcase", message: "Plan a trip and it'll show up here.")
             } else {
@@ -93,7 +95,7 @@ struct HomeTab: View {
 
     private var popularSection: some View {
         VStack(spacing: 8) {
-            SectionHeader(title: "Popular Destinations", hasButton: true, action: {})
+            SectionHeader(title: "Popular Destinations", hasButton: true, action: { onSwitchTab(.explore) })
             loadableSection(content?.popularDestinations,
                             empty: "No destinations yet.",
                             retry: { await content?.loadPopularDestinations(force: true) }) { dtos in
@@ -112,7 +114,7 @@ struct HomeTab: View {
 
     private var exploreExperiencesSection: some View {
         VStack(spacing: 8) {
-            SectionHeader(title: "Explore experiences nearby", hasButton: true, action: {})
+            SectionHeader(title: "Explore experiences nearby", hasButton: false, action: {})
             loadableSection(content?.categories,
                             empty: "No categories yet.",
                             retry: { await content?.loadCategories(force: true) }) { dtos in
@@ -133,7 +135,7 @@ struct HomeTab: View {
 
     private var popularExperiencesSection: some View {
         VStack(spacing: 8) {
-            SectionHeader(title: "Popular experiences in \(city.displayName)", hasButton: true, action: {})
+            SectionHeader(title: "Popular experiences in \(city.displayName)", hasButton: false, action: {})
             loadableSection(content?.experiencesByCity[city.rawValue],
                             empty: "No experiences yet.",
                             retry: { await content?.loadExperiences(cityId: city.rawValue, force: true) }) { dtos in

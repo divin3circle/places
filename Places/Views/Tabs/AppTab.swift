@@ -22,7 +22,8 @@ struct AppTab: View {
         TabView(selection: $activeTab) {
             Tab.init(value: .home) {
                 ScrollView(.vertical) {
-                   HomeTab(sponsoredAnimation: sponsoredAnimation)
+                   HomeTab(sponsoredAnimation: sponsoredAnimation,
+                           onSwitchTab: { activeTab = $0 })
                 }
                 .scrollableHeader(dismissDistance: 60, header: {
                     HomeHeader(onProfileTap: { activeTab = .profile })
