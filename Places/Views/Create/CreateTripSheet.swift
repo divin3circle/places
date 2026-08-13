@@ -50,7 +50,7 @@ struct CreateTripSheet: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color(.systemBackground))
-        .presentationDetents([.height(360), .medium], selection: $detent)
+        .presentationDetents([.height(360), .large], selection: $detent)
         .presentationDragIndicator(.visible)
         .presentationBackground(Color(.systemBackground))
     }
@@ -82,7 +82,7 @@ struct CreateTripSheet: View {
                 Button {
                     withAnimation(.snappy) {
                         isPlanning = true
-                        detent = .medium
+                        detent = .large
                     }
                 } label: {
                     Text("Start planning")

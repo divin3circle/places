@@ -126,13 +126,19 @@ struct CreateTripForm: View {
     private var preferencesStep: some View {
         stepScaffold(icon: "slider.horizontal.3", title: "A few preferences", subtitle: "Fine-tune the plan.") {
             VStack(alignment: .leading, spacing: 20) {
-                VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 12) {
+                    Image(systemName: "calendar")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.secondary)
                     Text("Start date")
                         .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    Spacer()
                     DatePicker("", selection: $vm.startDate, in: Date.now..., displayedComponents: .date)
                         .labelsHidden()
                         .datePickerStyle(.compact)
                 }
+                .padding(14)
+                .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 16))
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Budget currency")
