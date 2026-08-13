@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ProfileTab: View {
+  var onSwitchTab: (AppTabs) -> Void = { _ in }
   @State private var isLargeHeader: Bool = false
   @State private var topInset: CGFloat = 0
   @State private var scrollPhase: ScrollPhase = .idle
@@ -19,7 +20,7 @@ struct ProfileTab: View {
       }
       .padding(.bottom, 40)
       .safeAreaInset(edge: .top, spacing: 0) {
-        ProfileHeader(isLargerHeader: $isLargeHeader, topInset: $topInset)
+        ProfileHeader(isLargerHeader: $isLargeHeader, topInset: $topInset, onSwitchTab: onSwitchTab)
 
       }
     }

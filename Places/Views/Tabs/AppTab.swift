@@ -54,7 +54,7 @@ struct AppTab: View {
             // Lounges (Chats) is hidden for v1 — no messaging backend yet. Restore
             // this Tab + the .lounges entry in CustomTabBar when Chats is built.
             Tab.init(value: .profile) {
-                ProfileTab()
+                ProfileTab(onSwitchTab: { activeTab = $0 })
                     .adoptForCustomTabBar($progress)
                     .hideNativeTabBar()
                     .scrollIndicators(.hidden)
