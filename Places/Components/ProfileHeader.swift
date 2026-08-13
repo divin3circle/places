@@ -35,9 +35,12 @@ struct ProfileHeader: View {
                     .frame(width: 100, height: isLargerHeader ? 300 : 100)
                     .clipShape(.circle)
                     .overlay {
-                        // Lifetime members get an animated gold avatar frame.
+                        // Lifetime members get an animated gold avatar frame. Sized
+                        // to hug the avatar in both states (expanded avatar ≈ 200pt,
+                        // so the frame overshot at 300 — Image 22).
                         if isLifetime {
-                            LifetimeFrameView(size: isLargerHeader ? 300 : 132)
+                            LifetimeFrameView(size: isLargerHeader ? 235 : 132)
+                                .allowsHitTesting(false)
                         }
                     }
                     .overlay {
@@ -143,7 +146,7 @@ struct ProfileHeader: View {
     @ViewBuilder
     private func CustomNavigationBar() -> some View {
         VStack(alignment: .center, spacing: 6) {
-            HStack(spacing: 8) {
+            HStack(spacing: 2) {
                 Text(displayName)
                     .fontDesign(.rounded)
                     .font(.title)
