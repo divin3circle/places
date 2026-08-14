@@ -48,8 +48,9 @@ struct ProfileHeader: View {
                         // to hug the avatar in both states (expanded avatar ≈ 200pt,
                         // so the frame overshot at 300 — Image 22).
                         if isLifetime {
-                            LifetimeFrameView(size: isLargerHeader ? 235 : 132)
+                            LifetimeFrameView(size: isLargerHeader ? 370 : 162)
                                 .allowsHitTesting(false)
+                                .padding(.bottom, isLargerHeader ?105 : 12)
                         }
                     }
                     .overlay {
