@@ -100,7 +100,7 @@ final class PurchasesManager {
             if let meta = Self.subMeta[pkg.identifier] {
                 subs.append(SubOption(id: pkg.identifier, title: meta.title,
                                       priceString: price, periodLabel: meta.period,
-                                      monthlyTokens: meta.tokens, isBestValue: meta.best,
+                                      tokenGrant: meta.tokenGrant, isBestValue: meta.best,
                                       trialLabel: Self.trialLabel(pkg.storeProduct)))
             } else if let tokens = Self.coinTokens[pkg.identifier] {
                 coins.append(CoinPack(id: pkg.identifier, tokens: tokens, priceString: price))
@@ -126,11 +126,11 @@ final class PurchasesManager {
 
     // Display metadata keyed by RevenueCat package identifier (tokens mirror the
     // TOK grant rules; annual grants 6000/yr ≈ 500/mo).
-    private static let subMeta: [String: (title: String, period: String, tokens: Int, best: Bool)] = [
-        "$rc_weekly":   ("Weekly",   "/week",    50,   false),
-        "$rc_monthly":  ("Monthly",  "/month",   500,  false),
-        "$rc_annual":   ("Annual",   "/year",    500,  true),
-        "$rc_lifetime": ("Lifetime", "one-time", 1000, false),
+    private static let subMeta: [String: (title: String, period: String, tokenGrant: String, best: Bool)] = [
+        "$rc_weekly":   ("Weekly",   "/week",    "50 tokens / week",     false),
+        "$rc_monthly":  ("Monthly",  "/month",   "500 tokens / month",   false),
+        "$rc_annual":   ("Annual",   "/year",    "6,000 tokens / year",  true),
+        "$rc_lifetime": ("Lifetime", "one-time", "1,000 tokens / month", false),
     ]
     private static let coinTokens: [String: Int] = [
         "$rc_custom_tokens_25": 25, "$rc_custom_tokens_75": 75,

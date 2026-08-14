@@ -15,7 +15,7 @@ nonisolated struct SubOption: Identifiable, Hashable {
     let title: String         // "Weekly", "Annual"
     let priceString: String   // localized, from the store (e.g. "$14.99")
     let periodLabel: String   // "/week", "/year", "one-time"
-    let monthlyTokens: Int    // tokens granted per month (50 / 500 / 500 / 1000)
+    let tokenGrant: String    // accurate per-plan grant, e.g. "500 tokens / month"
     let isBestValue: Bool
     var trialLabel: String? = nil   // e.g. "3-day free trial" when an intro offer applies
 }

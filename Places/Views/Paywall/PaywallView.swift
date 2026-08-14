@@ -24,11 +24,11 @@ struct PaywallView: View {
     @State private var showCoins = false
 
     private let features: [(icon: String, text: String)] = [
-        ("infinity", "Unlimited AI itineraries"),
+        ("infinity", "Unlimited saved trips & bookmarks"),
         ("globe.europe.africa.fill", "Plan trips across multiple countries"),
-        ("bolt.fill", "500 tokens every month"),
         ("sparkles", "Priority, higher-quality planning"),
-        ("bell.slash.fill", "No upsells — ever"),
+        ("square.and.arrow.up", "Export any itinerary as a PDF"),
+        ("bolt.fill", "Monthly token top-ups"),
     ]
 
     var body: some View {
@@ -150,7 +150,7 @@ struct PaywallView: View {
                                 .background(.accent, in: .capsule)
                         }
                     }
-                    Text("\(plan.monthlyTokens) tokens / month")
+                    Text(plan.tokenGrant)
                         .font(.system(size: 13, design: .rounded))
                         .foregroundStyle(.secondary)
                     if let trial = plan.trialLabel {

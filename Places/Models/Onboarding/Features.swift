@@ -19,10 +19,10 @@ struct Feature: Identifiable {
 enum Features {
     static var list: [Feature] {
         [
-            Feature(id: "0", icon: "person.3.sequence.fill", title: "Collaborative Lounge", subtitle: "Invite your travel squad to plan and enjoy together.", color: .blue),
+            Feature(id: "0", icon: "mappin.and.ellipse", title: "Grounded in Real Places", subtitle: "Every stop is a real destination — with real prices and tips.", color: .blue),
             Feature(id: "1", icon: "wand.and.stars", title: "Instant AI Itineraries", subtitle: "Let our smart concierge build your itinerary route.", color: .accent),
-            Feature(id: "2", icon: "bolt.shield.fill", title: "True Off-Grid Utilities", subtitle: "Lose reception without losing your traveling plans.", color: .blue),
-            Feature(id: "3", icon: "map.fill", title: "Visual Route Radars", subtitle: "Chronologically traced paths across map boards.", color: .red)
+            Feature(id: "2", icon: "bolt.shield.fill", title: "Plan Even Offline", subtitle: "On-device AI builds your trips and keeps them — no signal needed.", color: .blue),
+            Feature(id: "3", icon: "map.fill", title: "Your Trip on the Map", subtitle: "See every stop, day by day, on an interactive map.", color: .red)
         ]
     }
 }
