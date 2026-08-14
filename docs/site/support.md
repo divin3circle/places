@@ -11,7 +11,7 @@ _When reporting a bug, tell us your device model, iOS version, and what you were
 Tokens power AI itinerary generation (a few tokens per plan) and multi-country "Border Passes". New accounts start with a small balance. Buy more any time from the coin button on the Home screen.
 
 **What is Places Pro?**
-Pro unlocks unlimited itineraries, multi-country planning, PDF export, "Optimize my day", and a monthly token grant. It's available weekly, monthly, annually, or as a one-time Lifetime purchase.
+Pro unlocks unlimited saved trips & bookmarks, multi-country planning, PDF export, "Optimize my day", and a monthly token grant. It's available weekly, monthly, annually, or as a one-time Lifetime purchase.
 
 **How do I restore a purchase?**
 Profile → **Restore purchases**. Make sure you're signed in with the same Apple Account you purchased with.

@@ -13,7 +13,7 @@ Places in East Africa is your AI travel concierge for Kenya, Tanzania, Uganda, R
 
 **Go Pro**
 Unlock the full experience with Places Pro:
-• Unlimited AI itineraries
+• Unlimited saved trips & bookmarks
 • Multi-country trip planning
 • Export any itinerary as a polished PDF
 • "Optimize my day" — smarter routing to cut backtracking

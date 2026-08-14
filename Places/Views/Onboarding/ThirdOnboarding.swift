@@ -13,10 +13,10 @@ struct ThirdOnboarding: View {
     
     var body: some View {
             let config: NotificationOnboardingConfig = NotificationOnboardingConfig(
-                title: "Stay connected with\nPush Notifications",
-                content: "We will send you push notifications to keep you updated once a friend joins your travel group or send a message.",
-                notificationTitle: "Hello jLynne",
-                notificationContent: "You trip to the savanna just received 2 more travel buddies, time to plan.",
+                title: "Stay in the loop with\nPush Notifications",
+                content: "Get trip reminders and a heads-up when your AI itinerary is ready.",
+                notificationTitle: "Your trip to the Savanna",
+                notificationContent: "Your itinerary is ready — time to start planning!",
                 primaryButtonTitle: "Continue",
                 secondaryButtonTitle: "Ask me Later"
             )

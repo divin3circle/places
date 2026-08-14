@@ -81,7 +81,7 @@ struct PaywallView: View {
                 .font(.system(size: 28, weight: .bold, design: .rounded))
                 .fontWidth(.expanded)
                 .multilineTextAlignment(.center)
-            Text("Plan smarter, travel further — unlimited itineraries and monthly tokens.")
+            Text("Plan smarter, travel further — no limits, priority AI planning, and monthly tokens.")
                 .font(.system(size: 15, design: .rounded))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
