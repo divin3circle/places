@@ -25,7 +25,7 @@ struct ExploreHero: View {
             let minY = proxy.frame(in: .scrollView(axis: .vertical)).minY
             let stretch = max(minY, 0)
 
-            Image("onboarding2")
+            Image("onboarding4")
                 .resizable()
                 .scaledToFill()
                 .frame(width: proxy.size.width, height: base + stretch)

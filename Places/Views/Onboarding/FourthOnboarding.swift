@@ -39,7 +39,7 @@ struct FourthOnboarding: View {
                 .microAnimations(delay: 0.4, slideDirection: .Bottom, offsetAmount: 0)
                 .padding(.vertical)
             
-            PrimaryButton(title: "Start Tour", kind: .appPrimary, action: navigateToHome)
+            PrimaryButton(title: "Start Tour", kind: .appPrimary, action: startTour)
                 .microAnimations(delay: 0.5, slideDirection: .Bottom, offsetAmount: 0)
                 .padding(.top)
             Button {
@@ -58,6 +58,16 @@ struct FourthOnboarding: View {
         .toolbar(.hidden, for: .navigationBar)
         .disabled(isFinishing)
         .toast($toast)
+    }
+    
+    private func startTour() {
+        // No isFinishing flag here: this push is synchronous, and setting it would
+        // leave the screen permanently .disabled() once the tour pops back.
+        guard !isFinishing else { return }
+
+        router.showScreen(.push) { _ in
+            AppTourOnboarding()
+        }
     }
 
     private func navigateToHome() {

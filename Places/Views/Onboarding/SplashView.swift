@@ -48,7 +48,6 @@ struct SplashView: View {
                     .padding(.horizontal, 18)
                     .padding(.vertical, 14)
                     .frame(maxWidth: .infinity)
-                    .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 18, style: .continuous))
                     .padding(.horizontal, 32)
                     .padding(.bottom, 24)
             }

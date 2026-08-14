@@ -200,8 +200,8 @@ struct CreateTripForm: View {
                     .microAnimations(delay: 0.22, slideDirection: .Bottom, offsetAmount: 20)
             } else {
                 // Fill the roomy full-height sheet with the reused trip animation.
-                LottieAnimationLoader(fileName: resolveLottieAnimation(icon), loop: true, loopCount: 2, autoPlay: true, )
-                    .microAnimations(delay: 0.18, slideDirection: .Bottom, offsetAmount: 16)
+                LottieAnimationLoader(fileName: resolveLottieAnimation(icon), loop: true, loopCount: 2, autoPlay: true)
+                
                 Spacer()
                 content()
                     .microAnimations(delay: 0.28, slideDirection: .Bottom, offsetAmount: 20)
