@@ -40,6 +40,11 @@ final class ItineraryChatViewModel {
     var errorMessage: String?
     /// Set when generation was declined for lack of tokens — the view shows the coin shop.
     var paymentRequired = false
+    /// True when the FIRST generation failed with nothing to show. The view offers a
+    /// retry instead of a dead composer. Cleared on retry and on success.
+    var didFail = false
+    /// Whether there's a generated itinerary to refine/save yet.
+    var hasItinerary: Bool { lastFullItinerary != nil }
 
     // "Convert to trip" state
     var isSaving = false
@@ -185,9 +190,27 @@ final class ItineraryChatViewModel {
             } catch {
                 errorMessage = error.localizedDescription
                 setKind(id: assistantId, .text("Couldn't generate the itinerary: \(error.localizedDescription)"))
+                if lastFullItinerary == nil { didFail = true }
             }
             isGenerating = false
         }
+    }
+
+    /// Re-run the first generation after a failure. Reuses the engine built during
+    /// `start` (the grounding/intel prelude already ran); replaces the error bubble
+    /// with a fresh planning placeholder.
+    func retryInitial() {
+        guard !isGenerating, lastFullItinerary == nil, engine != nil else { return }
+        didFail = false
+        errorMessage = nil
+        items.removeAll { item in
+            if case .assistant = item.role { return true }
+            return false
+        }
+        let assistantId = UUID()
+        items.append(ItineraryChatItem(id: assistantId, role: .assistant, kind: .itinerary(nil)))
+        isGenerating = true
+        generateInitial(assistantId: assistantId)
     }
 
     /// A follow-up message is an EDIT: regenerate the whole itinerary (new version).

@@ -261,9 +261,27 @@ struct GenerateItineraryView: View {
 
     @ViewBuilder
     private var footer: some View {
-        if !vm.isGenerating {
+        if vm.isGenerating {
+            EmptyView()                     // hidden mid-stream
+        } else if vm.didFail && !vm.hasItinerary {
+            retryBar                        // first generation failed → offer a retry
+        } else {
             composerBar
         }
+    }
+
+    private var retryBar: some View {
+        Button { vm.retryInitial() } label: {
+            Label("Try again", systemImage: "arrow.clockwise")
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(.green.gradient, in: .capsule)
+        }
+        .buttonStyle(PressableButtonStyle())
+        .padding(.horizontal, 15)
+        .padding(.bottom, 8)
     }
 
     // MARK: Header
@@ -296,10 +314,6 @@ struct GenerateItineraryView: View {
                     Label("Optimize day", systemImage: "wand.and.stars")
                 }
                 .disabled(vm.isGenerating)
-                Divider()
-                Button(role: .destructive) {
-                    
-                } label: { Label("Delete", systemImage: "trash") }
             } label: {
                 Image(systemName: "ellipsis")
                     .font(.system(size: 18, weight: .semibold))
