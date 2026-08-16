@@ -328,45 +328,20 @@ struct GenerateItineraryView: View {
     private var composerBar: some View {
         let fillColor = Color.gray.opacity(0.15)
         return AnimatedBottomBar(hint: "Ask for changes…", text: $draft, isFocused: $isFocused) {
-            Button { } label: {
-                Image(systemName: "plus")
-                    .fontWeight(.medium)
-                    .foregroundStyle(Color.primary)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(fillColor, in: .circle)
-            }
-            Button { } label: {
-                Image(systemName: "magnifyingglass")
-                    .fontWeight(.medium)
-                    .foregroundStyle(Color.primary)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(fillColor, in: .circle)
-            }
-            Button { } label: {
-                Image(systemName: "mic.fill")
-                    .fontWeight(.medium)
-                    .foregroundStyle(Color.primary)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(fillColor, in: .circle)
-            }
+            // No leading actions — the previous +, search and mic buttons were
+            // never wired to anything.
+            EmptyView()
         } trailingAction: {
+            // Send (shown once the field is focused); the floating paperplane below
+            // is the send affordance while collapsed.
             Button { submit() } label: {
-                ZStack {
-                    Image(systemName: "arrow.up")
-                        .fontWeight(.bold)
-                        .foregroundStyle(Color.white)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(.green.gradient, in: .circle)
-                        .blur(radius: isFocused ? 0 : 5)
-                        .opacity(isFocused ? 1 : 0)
-
-                    Image(systemName: "mic.fill")
-                        .foregroundStyle(Color.primary)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(fillColor, in: .circle)
-                        .blur(radius: !isFocused ? 0 : 5)
-                        .opacity(!isFocused ? 1 : 0)
-                }
+                Image(systemName: "arrow.up")
+                    .fontWeight(.bold)
+                    .foregroundStyle(Color.white)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(.green.gradient, in: .circle)
+                    .blur(radius: isFocused ? 0 : 5)
+                    .opacity(isFocused ? 1 : 0)
             }
         } mainAction: {
             Button { submit() } label: {

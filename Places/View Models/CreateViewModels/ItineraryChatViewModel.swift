@@ -101,6 +101,17 @@ final class ItineraryChatViewModel {
         guard !started else { return }
         started = true
 
+        // Show a stable loading state from the very first frame — before the async
+        // grounding / trip-intel / engine-warmup prelude resolves — by hiding the
+        // composer (isGenerating) and rendering the planning placeholder in the same
+        // assistant bubble the stream will fill. Resumed trips already have content,
+        // so they skip this.
+        let assistantId = UUID()
+        if !isResumed {
+            isGenerating = true
+            items.append(ItineraryChatItem(id: assistantId, role: .assistant, kind: .itinerary(nil)))
+        }
+
         Task {
             // Fetch the live grounding palette before generating; degrade to an
             // empty catalog on failure (generation still runs, just without pins).
@@ -142,21 +153,21 @@ final class ItineraryChatViewModel {
             )
             engine?.prewarm()
             // Resumed trips already have an itinerary — wait for the user's edit.
-            if !isResumed { generateInitial() }
+            if !isResumed { generateInitial(assistantId: assistantId) }
         }
     }
 
-    private func generateInitial() {
-        guard let engine else { return }
+    /// Streams the first itinerary into the placeholder bubble created in `start`.
+    /// `isGenerating` is already true (set synchronously in `start`); this only
+    /// clears it when the stream finishes or fails.
+    private func generateInitial(assistantId: UUID) {
+        guard let engine else { isGenerating = false; return }
         let request = """
         Create a \(config.durationDays)-day itinerary now, based on the trip details in your instructions. \
         Use findPlaces to look up places by kind (e.g. wildlife, city, beach), then build the itinerary \
         using only the exact place names it returns. \
         Produce exactly \(config.durationDays) day(s).
         """
-        let assistantId = UUID()
-        items.append(ItineraryChatItem(id: assistantId, role: .assistant, kind: .itinerary(nil)))
-        isGenerating = true
         errorMessage = nil
         task = Task {
             do {
