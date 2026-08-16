@@ -32,4 +32,11 @@ enum SupabaseConfig {
     static var tripIntelFunctionURL: URL {
         functionsBaseURL.appendingPathComponent(tripIntelFunction)
     }
+
+    /// Permanently deletes the signed-in user's account + data (Apple 5.1.1(v)).
+    static let deleteAccountFunction = "delete-account"
+
+    static var deleteAccountFunctionURL: URL {
+        functionsBaseURL.appendingPathComponent(deleteAccountFunction)
+    }
 }

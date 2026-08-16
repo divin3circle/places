@@ -154,6 +154,18 @@ final class SessionStore {
         phase = .signedOut
     }
 
+    /// Permanently deletes the user's account and server data (Apple 5.1.1(v)),
+    /// then tears down local state exactly like `signOut`. Throws if the server
+    /// delete fails so the caller can surface it and keep the user signed in.
+    func deleteAccount() async throws {
+        try await auth.deleteAccount()
+        userID = nil
+        defaults.set(false, forKey: mirrorKey)
+        defaults.removeObject(forKey: profileCacheKey)
+        currentProfile = nil
+        phase = .signedOut
+    }
+
     private func loadProfileAndSetPhase(id: UUID) async {
         do {
             let profile = try await profiles.fetch(id: id)

@@ -30,6 +30,8 @@ struct ProfileHeader: View {
     @State private var pickedItem: PhotosPickerItem?
     @State private var isUploading = false
     @State private var toast: ToastData?
+    @State private var showDeleteConfirm = false
+    @State private var isDeleting = false
 
     private var displayName: String { session?.currentProfile?.name ?? "Traveler" }
     private var displayEmail: String { session?.currentProfile?.email ?? "" }
@@ -44,9 +46,6 @@ struct ProfileHeader: View {
                     .frame(width: 100, height: isLargerHeader ? 300 : 100)
                     .clipShape(.circle)
                     .overlay {
-                        // Lifetime members get an animated gold avatar frame. Sized
-                        // to hug the avatar in both states (expanded avatar ≈ 200pt,
-                        // so the frame overshot at 300 — Image 22).
                         if isLifetime {
                             LifetimeFrameView(size: isLargerHeader ? 370 : 162)
                                 .allowsHitTesting(false)
@@ -108,6 +107,12 @@ struct ProfileHeader: View {
         }
         .padding(.top, 15)
         .toast($toast)
+        .alert("Delete Account?", isPresented: $showDeleteConfirm) {
+            Button("Delete", role: .destructive) { Task { await performDelete() } }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This permanently deletes your account, saved trips, and token balance. This can't be undone.")
+        }
         .onChange(of: pickedItem) { _, item in
             guard let item else { return }
             Task {
@@ -247,9 +252,28 @@ struct ProfileHeader: View {
                 Button { openURL(contactURL) } label: { Label("Contact developer", systemImage: "envelope") }
                 Button { openURL(privacyURL) } label: { Label("Privacy Policy", systemImage: "hand.raised") }
                 Button { openURL(termsURL) } label: { Label("Terms of Service", systemImage: "doc.text") }
+                Divider()
+                Button(role: .destructive) { showDeleteConfirm = true } label: {
+                    Label("Delete Account", systemImage: "trash")
+                }
             } label: {
                 actionButtonLabel(icon: "ellipsis", title: "More")
             }
+        }
+    }
+
+    /// Permanently deletes the account, then dismisses so the root switches back
+    /// to the auth screen (SessionStore moves to `.signedOut`). Keeps the user in
+    /// place and surfaces a toast if the server delete fails.
+    private func performDelete() async {
+        guard !isDeleting else { return }
+        isDeleting = true
+        defer { isDeleting = false }
+        do {
+            try await session?.deleteAccount()
+            router.dismissAllScreens()
+        } catch {
+            toast = ToastData(message: "Couldn't delete your account. Please try again.", isError: true)
         }
     }
 

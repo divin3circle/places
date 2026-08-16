@@ -4,10 +4,16 @@ import Foundation
 final class FakeAuthProviding: AuthProviding, @unchecked Sendable {
     var restoreID: UUID?
     var signInID = UUID()
+    private(set) var deleteCount = 0
+    var shouldThrowOnDelete = false
 
     func restoreSession() async throws -> UUID? { restoreID }
     func signInWithApple(idToken: String, rawNonce: String) async throws -> UUID { signInID }
     func signOut() async throws {}
+    func deleteAccount() async throws {
+        deleteCount += 1
+        if shouldThrowOnDelete { throw URLError(.badServerResponse) }
+    }
 }
 
 final class FakeProfileProviding: ProfileProviding {
