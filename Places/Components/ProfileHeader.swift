@@ -111,7 +111,7 @@ struct ProfileHeader: View {
             Button("Delete", role: .destructive) { Task { await performDelete() } }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This permanently deletes your account, saved trips, and token balance. This can't be undone.")
+            Text("This permanently deletes your account, saved trips, and token balance. If you have an active subscription, deleting your account won't cancel it — manage it in Settings → Subscriptions. This can't be undone.")
         }
         .onChange(of: pickedItem) { _, item in
             guard let item else { return }
