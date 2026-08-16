@@ -195,13 +195,10 @@ struct CreateTripForm: View {
             .microAnimations(delay: 0.12, slideDirection: .Bottom, offsetAmount: 16)
 
             if vm.isLastStep {
-                // Content-dense final step — no animation; content flows from here.
                 content()
                     .microAnimations(delay: 0.22, slideDirection: .Bottom, offsetAmount: 20)
             } else {
-                // Fill the roomy full-height sheet with the reused trip animation.
                 LottieAnimationLoader(fileName: resolveLottieAnimation(icon), loop: true, loopCount: 2, autoPlay: true)
-                
                 Spacer()
                 content()
                     .microAnimations(delay: 0.28, slideDirection: .Bottom, offsetAmount: 20)
