@@ -296,12 +296,10 @@ struct GenerateItineraryView: View {
                     Label("Optimize day", systemImage: "wand.and.stars")
                 }
                 .disabled(vm.isGenerating)
-
-                Button { } label: { Label("Pin", systemImage: "pin") }
-                Button { } label: { Label("Find in chat", systemImage: "magnifyingglass") }
-                Button { } label: { Label("Archive", systemImage: "archivebox") }
                 Divider()
-                Button(role: .destructive) { } label: { Label("Delete", systemImage: "trash") }
+                Button(role: .destructive) {
+                    
+                } label: { Label("Delete", systemImage: "trash") }
             } label: {
                 Image(systemName: "ellipsis")
                     .font(.system(size: 18, weight: .semibold))

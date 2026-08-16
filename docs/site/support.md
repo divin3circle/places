@@ -23,7 +23,7 @@ Subscriptions are managed by Apple: **Settings → [your name] → Subscriptions
 Purchases are handled by Apple. Request refunds via **reportaproblem.apple.com**. Consumable tokens are non-refundable once granted.
 
 **How do I delete my account?**
-Email us at **sylusabel1@gmail.com** and we'll remove your account and associated data.
+In the app: **Profile → the "More" (•••) tile → Delete Account**, then confirm. This permanently removes your account, saved trips, and token balance. If you'd rather we do it for you, email **sylusabel1@gmail.com**.
 
 ---
 See also: [Privacy Policy](/privacy) · [Terms of Service](/terms)
