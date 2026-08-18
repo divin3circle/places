@@ -38,6 +38,9 @@ struct PaywallView: View {
                     hero
                     featureCard
                     planList
+                    if selectedIsSubscription {
+                        subscriptionDisclosure
+                    }
                     if let errorText {
                         Text(errorText)
                             .font(.system(size: 13, design: .rounded))
@@ -109,6 +112,16 @@ struct PaywallView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
         .background(Color.accentColor.opacity(0.06), in: .rect(cornerRadius: 20, style: .continuous))
+    }
+
+    // MARK: Legal disclosure (App Review 3.1.2 — auto-renewable subscriptions)
+
+    private var subscriptionDisclosure: some View {
+        Text("Subscriptions renew automatically. Your Apple Account is charged at confirmation of purchase and again within 24 hours before each period ends, unless you cancel at least 24 hours before the current period ends. Manage or cancel anytime in Settings → Apple Account → Subscriptions.")
+            .font(.system(size: 11, design: .rounded))
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     // MARK: Plans
@@ -216,6 +229,13 @@ struct PaywallView: View {
     }
 
     // MARK: Actions
+
+    /// True unless the one-time Lifetime option is selected. Drives whether the
+    /// auto-renewal disclosure is shown (Lifetime is a non-consumable, not a sub).
+    private var selectedIsSubscription: Bool {
+        guard let id = selectedId else { return true }
+        return id != "$rc_lifetime"
+    }
 
     private func ensureSelection() {
         guard selectedId == nil, let subs = purchases?.subscriptions, !subs.isEmpty else { return }

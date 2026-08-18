@@ -75,9 +75,6 @@ struct SponsoredDetails: View {
 
             chips
                 .padding(.top, 12)
-
-            ctaButton
-                .padding(.top, 14)
         }
     }
 
@@ -117,19 +114,6 @@ struct SponsoredDetails: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(.ultraThinMaterial, in: .capsule)
-    }
-
-    private var ctaButton: some View {
-        Button {
-            // TODO: route to the sponsor's destination (maps / booking / partner deep link).
-        } label: {
-            Text(card.ctaLabel)
-                .font(.headline)
-                .fontDesign(.rounded)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity, minHeight: 52)
-                .background(.accent, in: .capsule)
-        }
     }
 
     private func dismiss() {
