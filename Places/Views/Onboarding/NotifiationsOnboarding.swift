@@ -98,11 +98,15 @@ struct NotifiationsOnboarding<NotificationLogo: View>: View {
                             .background(Color.primary, in: .capsule)
                     }
                     
-                    if authorization == .notDetermined {
+                    // Notifications are always optional — the user must be able to
+                    // continue without granting them (App Review 4.5.4). Keep a skip
+                    // path in every non-authorized state, including `.denied`, so the
+                    // "Go to Settings" button is never the only way forward.
+                    if authorization != .authorized {
                         Button {
                             onSecondaryButtonTap()
                         } label: {
-                            Text(config.secondaryButtonTitle)
+                            Text(authorization == .denied ? "Maybe later" : config.secondaryButtonTitle)
                                 .fontWeight(.medium)
                                 .fontDesign(.rounded)
                                 .foregroundStyle(backgroundColor.opacity(0.7))
