@@ -18,3 +18,9 @@ supabase/.temp/
 
 # Generated App Store screenshots (large binaries; uploaded to ASC, not tracked)
 appstore/
+
+# Xcode per-user state
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+DerivedData/
+.DS_Store
