@@ -39,7 +39,7 @@ struct TripView: View {
             bottomBar
                 .padding(.bottom, 10)
                 // Fade + disable as the sheet rises over it (issue: unclickable when open).
-                .opacity(1 - min(progress * 1.6, 1))
+                .opacity(1.0 - min(Double(progress) * 1.6, 1.0))
                 .allowsHitTesting(progress < 0.4)
         }
         .task {

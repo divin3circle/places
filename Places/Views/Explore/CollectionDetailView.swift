@@ -91,7 +91,7 @@ struct CollectionDetailView: View {
                     .foregroundStyle(.white.opacity(0.9))
             }
             .padding(20)
-            .opacity(1 - min(progress * 1.4, 1))
+            .opacity(1.0 - min(Double(progress) * 1.4, 1.0))
 
             HStack {
                 backButton
